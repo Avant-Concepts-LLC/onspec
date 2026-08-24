@@ -1,0 +1,5 @@
+{
+  "specDir": "specs",
+  "code": ["src/**"],
+  "base": "HEAD~1"
+}

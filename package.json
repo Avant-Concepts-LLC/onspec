@@ -1,0 +1,39 @@
+{
+  "name": "speccheck",
+  "version": "0.1.0",
+  "description": "Git-native verification layer for spec-driven development. Specs that refuse to drift.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "speccheck": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:junit": "vitest run --reporter=default --reporter=junit --outputFile=test-results.xml",
+    "speccheck": "tsx src/cli.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
+    "commander": "^15.0.0",
+    "fast-xml-parser": "^5.11.0",
+    "gray-matter": "^4.0.3",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.7",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.3.0",
+    "@types/picomatch": "^4.0.3",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
