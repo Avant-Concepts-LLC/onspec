@@ -69,6 +69,7 @@ Two layers, deterministic first:
 | `speccheck verify` | Criterion-by-criterion conformance verdicts for the current diff | Advisory; `--strict` exits 1 on unmet |
 | `speccheck drift` | Flags changed code with no approved governing spec | Advisory; `--strict` exits 1 on findings |
 | `speccheck lint` | Readiness grade (A–F) per spec: ambiguity, dead globs, missing evidence | Advisory; `--strict` exits 1 on errors |
+| `speccheck reverse` | Reverse-generates draft specs from existing code + tests (brownfield on-ramp) | Writes `status: draft` only |
 
 Common flags: `--base <ref>`, `--head <ref>`, `--format markdown`, `--output <file>`.
 
@@ -106,6 +107,18 @@ speccheck drift --base HEAD     # ⚠ [unspecced-change] src/hotfix.ts …
 speccheck verify --base HEAD --test-results test-results.xml
 # ❌ unmet  C2  A changed code file whose only coverage is a non-approved spec …
 ```
+
+## Reverse-spec generation (brownfield on-ramp)
+
+For codebases with no specs at all, `speccheck reverse` recovers the implicit spec from existing code and tests:
+
+```bash
+speccheck reverse                       # drafts via the Claude API (needs ANTHROPIC_API_KEY)
+speccheck reverse --prompt-only         # print the drafting prompt to drive any agent by hand
+speccheck reverse --from-json out.json  # ingest drafts an agent produced (draftsSchema shape)
+```
+
+The LLM only drafts. Everything that must be true is enforced deterministically afterwards: criteria anchored to test names that don't actually exist are stripped and reported as test gaps, ids are assigned in sequence, and output is always `status: draft` — approval stays a human act in a reviewed PR. Validated against [unjs/defu](https://github.com/unjs/defu): 4 specs, 20 criteria, 19 anchored to existing tests, 0 hallucinated pointers admitted, and `verify` then scored the repo 19 met / 1 uncertain (a real test gap it surfaced).
 
 ## Status
 

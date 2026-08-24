@@ -1,5 +1,5 @@
 import type { CriterionVerdict, Spec, TestResult } from "./types.js";
-import { governingSpecs } from "./covers.js";
+import { coversFile, governingSpecs } from "./covers.js";
 import { resolveEvidence } from "./evidence.js";
 import { assessCriterion, llmAvailable } from "./llm.js";
 
@@ -26,7 +26,7 @@ export interface VerifyReport {
 export async function verify(opts: VerifyOptions): Promise<VerifyReport> {
   const active = opts.specs.filter((s) => s.status !== "superseded");
   const governed = opts.all
-    ? new Map(active.map((s) => [s, opts.changedFiles]))
+    ? new Map(active.map((s) => [s, opts.changedFiles.filter((f) => coversFile(s, f))]))
     : governingSpecs(active, opts.changedFiles);
 
   const verdicts: CriterionVerdict[] = [];

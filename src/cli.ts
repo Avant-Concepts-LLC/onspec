@@ -12,6 +12,13 @@ import { detectDrift } from "./drift.js";
 import { lint } from "./lint.js";
 import { llmAvailable, DEFAULT_MODEL } from "./llm.js";
 import {
+  buildPrompt,
+  draftWithLlm,
+  draftsSchema,
+  gatherFiles,
+  materializeDrafts,
+} from "./reverse.js";
+import {
   renderDrift,
   renderLint,
   renderVerifyMarkdown,
@@ -129,6 +136,57 @@ program
     emit(renderLint(report, opts.format === "markdown"), opts);
     const hasErrors = report.findings.some((f) => f.severity === "error");
     if (opts.strict && hasErrors) process.exit(1);
+  });
+
+program
+  .command("reverse")
+  .description("Reverse-generate draft specs from existing code and tests (the brownfield on-ramp)")
+  .option("--code <globs...>", "source globs to spec (default: config code globs)")
+  .option("--tests <globs...>", "test globs to mine for evidence anchors", ["test/**", "tests/**", "src/**/*.test.*", "src/**/*.spec.*"])
+  .option("--from-json <file>", "skip the built-in LLM call; read drafts (JSON, draftsSchema shape) produced by an outside agent")
+  .option("--prompt-only", "print the drafting prompt and exit (for driving an outside agent)", false)
+  .option("-m, --model <model>", "model for the built-in drafting call", DEFAULT_MODEL)
+  .action(async (opts) => {
+    const repoRoot = repoRootFrom(process.cwd());
+    const config = loadConfig(repoRoot);
+    const codeFiles = gatherFiles(repoRoot, opts.code ?? config.code);
+    const testFiles = gatherFiles(repoRoot, opts.tests);
+    if (codeFiles.length === 0) {
+      console.error(pc.red("no source files matched — pass --code <globs...>"));
+      process.exit(2);
+    }
+    if (opts.promptOnly) {
+      console.log(buildPrompt(codeFiles, testFiles));
+      return;
+    }
+    let drafts;
+    if (opts.fromJson) {
+      drafts = draftsSchema.parse(JSON.parse(fs.readFileSync(opts.fromJson, "utf8"))).specs;
+    } else {
+      if (!llmAvailable()) {
+        console.error(
+          pc.red(
+            "no ANTHROPIC_API_KEY found. Either set one, or drive an agent with `speccheck reverse --prompt-only` and feed its JSON back via --from-json.",
+          ),
+        );
+        process.exit(2);
+      }
+      drafts = await draftWithLlm(codeFiles, testFiles, opts.model);
+    }
+    const { specs: existing } = loadSpecs(repoRoot, config.specDir);
+    const result = materializeDrafts(repoRoot, drafts, existing, config.specDir);
+    for (const file of result.written) console.log(`${pc.green("✔")} wrote ${file}`);
+    for (const issue of result.issues) {
+      console.log(
+        pc.yellow(`⚠ stripped unverifiable evidence "${issue.evidence}" (${issue.problem}) — criterion kept as a test gap`),
+      );
+    }
+    console.log(
+      pc.bold(
+        `${result.written.length} draft spec(s), ${result.criteria} criteria, ${result.anchored} anchored to existing tests, ${result.issues.length} hallucinated pointer(s) stripped`,
+      ),
+    );
+    console.log(pc.dim("drafts are status: draft — review and approve via a normal PR, then run speccheck verify"));
   });
 
 program.parseAsync().catch((err) => {
