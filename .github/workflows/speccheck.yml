@@ -1,0 +1,28 @@
+name: speccheck
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  speccheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run tests with JUnit output
+        run: |
+          npm ci
+          npm run test:junit
+      - name: Spec conformance
+        uses: ./
+        with:
+          test-results: test-results.xml
+          # anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}  # enable LLM assessment

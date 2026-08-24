@@ -16,7 +16,15 @@ function git(repoRoot: string, args: string[]): string {
 export function changedFiles(repoRoot: string, base: string, head?: string): string[] {
   const range = head ? [`${base}...${head}`] : [base];
   const out = git(repoRoot, ["diff", "--name-only", "--diff-filter=ACMRD", ...range]);
-  return out.split("\n").filter(Boolean);
+  const files = new Set(out.split("\n").filter(Boolean));
+  if (!head) {
+    // Working-tree comparison: `git diff` can't see brand-new untracked
+    // files, and the 2 a.m. hotfix is exactly the kind of change that
+    // shows up as one. Include them.
+    const untracked = git(repoRoot, ["ls-files", "--others", "--exclude-standard"]);
+    for (const f of untracked.split("\n").filter(Boolean)) files.add(f);
+  }
+  return [...files];
 }
 
 /** Unified diff text between base and head (or working tree). */
