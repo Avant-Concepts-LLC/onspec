@@ -1,11 +1,11 @@
-name: speccheck
+name: onspec
 on:
   pull_request:
   push:
     branches: [main]
 
 jobs:
-  speccheck:
+  onspec:
     runs-on: ubuntu-latest
     permissions:
       contents: read

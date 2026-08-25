@@ -13,7 +13,7 @@ criteria:
     verify: test
     evidence: tests/report.test.ts::markdown report includes a row per criterion
   - id: C2
-    text: Configuration falls back to documented defaults when speccheck.config.json is absent
+    text: Configuration falls back to documented defaults when onspec.config.json is absent
     verify: test
     evidence: tests/config.test.ts::defaults apply when config file is absent
   - id: C3

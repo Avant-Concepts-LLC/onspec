@@ -1,11 +1,11 @@
 {
-  "name": "speccheck",
+  "name": "onspec",
   "version": "0.1.0",
-  "description": "Git-native verification layer for spec-driven development. Specs that refuse to drift.",
+  "description": "Specs that refuse to drift. Git-native verification layer for spec-driven development.",
   "type": "module",
   "license": "MIT",
   "bin": {
-    "speccheck": "./dist/cli.js"
+    "onspec": "./dist/cli.js"
   },
   "files": [
     "dist"
@@ -15,7 +15,8 @@
     "dev": "tsx src/cli.ts",
     "test": "vitest run",
     "test:junit": "vitest run --reporter=default --reporter=junit --outputFile=test-results.xml",
-    "speccheck": "tsx src/cli.ts"
+    "onspec": "tsx src/cli.ts",
+    "prepublishOnly": "npm run build && npm test"
   },
   "engines": {
     "node": ">=20"
@@ -35,5 +36,12 @@
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
-  }
+  },
+  "keywords": [
+    "spec",
+    "spec-driven-development",
+    "verification",
+    "drift",
+    "ci"
+  ]
 }

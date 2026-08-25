@@ -11,10 +11,10 @@ const configSchema = z.object({
   base: z.string().default("HEAD~1"),
 });
 
-export type SpeccheckConfig = z.infer<typeof configSchema>;
+export type OnspecConfig = z.infer<typeof configSchema>;
 
-export function loadConfig(repoRoot: string): SpeccheckConfig {
-  const file = path.join(repoRoot, "speccheck.config.json");
+export function loadConfig(repoRoot: string): OnspecConfig {
+  const file = path.join(repoRoot, "onspec.config.json");
   if (!fs.existsSync(file)) return configSchema.parse({});
   return configSchema.parse(JSON.parse(fs.readFileSync(file, "utf8")));
 }

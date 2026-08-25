@@ -13,7 +13,7 @@ import { parseSpec } from "../src/spec.js";
 import type { Spec } from "../src/types.js";
 
 function tmpRepo(files: Record<string, string>): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "speccheck-rev-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "onspec-rev-"));
   for (const [rel, content] of Object.entries(files)) {
     const full = path.join(dir, rel);
     fs.mkdirSync(path.dirname(full), { recursive: true });

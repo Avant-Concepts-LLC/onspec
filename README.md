@@ -1,8 +1,8 @@
-# speccheck
+# onspec
 
 **Specs that refuse to drift.** A git-native verification layer for spec-driven development — works with any generator (Claude Code, Cursor, Kiro, Spec Kit output, or humans).
 
-Everyone builds the front half of spec-driven development: spec → generated code. speccheck is the back half: proving the code *stays* true to the spec, PR after PR, hotfix after hotfix.
+Everyone builds the front half of spec-driven development: spec → generated code. onspec is the back half: proving the code *stays* true to the spec, PR after PR, hotfix after hotfix.
 
 - **Specs are files in the repo** (`specs/*.spec.md`) — versioned, diffed, and approved through normal PRs.
 - **Every change is checked against its governing spec** — each acceptance criterion gets a met / unmet / uncertain verdict with evidence.
@@ -15,14 +15,14 @@ npm install
 npm run build
 
 # Grade your specs for verifiability
-speccheck lint
+onspec lint
 
 # Check a change against its governing specs
 npm run test:junit                       # any runner that emits JUnit XML works
-speccheck verify --base origin/main --test-results test-results.xml
+onspec verify --base origin/main --test-results test-results.xml
 
 # Flag unspecced changes
-speccheck drift --base origin/main
+onspec drift --base origin/main
 ```
 
 ## Spec format
@@ -60,20 +60,20 @@ Two layers, deterministic first:
 1. **Deterministic anchors.** `verify: test` evidence (`file::test name`) resolves through your CI's JUnit report — the test result *is* the verdict, no LLM opinion involved. `verify: assertion` evidence (`file#snippet`) is met exactly when the file contains the snippet.
 2. **LLM only for the gap.** Criteria without deterministic evidence get an LLM assessment of the diff (Claude, via your `ANTHROPIC_API_KEY`). Every met/unmet verdict must cite `file:line` evidence — uncited verdicts are downgraded to uncertain. No key → those criteria stay uncertain and say so.
 
-`verify: manual` is allowed but visible: the report surfaces it every time, and `speccheck lint` warns about it.
+`verify: manual` is allowed but visible: the report surfaces it every time, and `onspec lint` warns about it.
 
 ## Commands
 
 | Command | What it does | Blocking? |
 |---|---|---|
-| `speccheck verify` | Criterion-by-criterion conformance verdicts for the current diff | Advisory; `--strict` exits 1 on unmet |
-| `speccheck drift` | Flags changed code with no approved governing spec | Advisory; `--strict` exits 1 on findings |
-| `speccheck lint` | Readiness grade (A–F) per spec: ambiguity, dead globs, missing evidence | Advisory; `--strict` exits 1 on errors |
-| `speccheck reverse` | Reverse-generates draft specs from existing code + tests (brownfield on-ramp) | Writes `status: draft` only |
+| `onspec verify` | Criterion-by-criterion conformance verdicts for the current diff | Advisory; `--strict` exits 1 on unmet |
+| `onspec drift` | Flags changed code with no approved governing spec | Advisory; `--strict` exits 1 on findings |
+| `onspec lint` | Readiness grade (A–F) per spec: ambiguity, dead globs, missing evidence | Advisory; `--strict` exits 1 on errors |
+| `onspec reverse` | Reverse-generates draft specs from existing code + tests (brownfield on-ramp) | Writes `status: draft` only |
 
 Common flags: `--base <ref>`, `--head <ref>`, `--format markdown`, `--output <file>`.
 
-Config (optional `speccheck.config.json`):
+Config (optional `onspec.config.json`):
 
 ```json
 { "specDir": "specs", "code": ["src/**"], "base": "HEAD~1" }
@@ -84,14 +84,14 @@ Config (optional `speccheck.config.json`):
 ## GitHub Action
 
 ```yaml
-- uses: your-org/speccheck@main
+- uses: your-org/onspec@main
   with:
     test-results: test-results.xml
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}   # optional
     strict: "false"                                       # advisory first — earn the right to block
 ```
 
-Posts a single, self-updating conformance comment on the PR and writes the report to the job summary. See `.github/workflows/speccheck.yml` for the full example.
+Posts a single, self-updating conformance comment on the PR and writes the report to the job summary. See `.github/workflows/onspec.yml` for the full example.
 
 ## Dogfood
 
@@ -100,22 +100,22 @@ This repo verifies itself: `specs/` governs `src/`, and every criterion is ancho
 ```bash
 # The 2 a.m. hotfix — an unspecced file
 echo 'export const x = 1;' > src/hotfix.ts
-speccheck drift --base HEAD     # ⚠ [unspecced-change] src/hotfix.ts …
+onspec drift --base HEAD     # ⚠ [unspecced-change] src/hotfix.ts …
 
 # The broken PR — sabotage covered code, watch the criterion fail
 # (edit src/drift.ts, run npm run test:junit, then:)
-speccheck verify --base HEAD --test-results test-results.xml
+onspec verify --base HEAD --test-results test-results.xml
 # ❌ unmet  C2  A changed code file whose only coverage is a non-approved spec …
 ```
 
 ## Reverse-spec generation (brownfield on-ramp)
 
-For codebases with no specs at all, `speccheck reverse` recovers the implicit spec from existing code and tests:
+For codebases with no specs at all, `onspec reverse` recovers the implicit spec from existing code and tests:
 
 ```bash
-speccheck reverse                       # drafts via the Claude API (needs ANTHROPIC_API_KEY)
-speccheck reverse --prompt-only         # print the drafting prompt to drive any agent by hand
-speccheck reverse --from-json out.json  # ingest drafts an agent produced (draftsSchema shape)
+onspec reverse                       # drafts via the Claude API (needs ANTHROPIC_API_KEY)
+onspec reverse --prompt-only         # print the drafting prompt to drive any agent by hand
+onspec reverse --from-json out.json  # ingest drafts an agent produced (draftsSchema shape)
 ```
 
 The LLM only drafts. Everything that must be true is enforced deterministically afterwards: criteria anchored to test names that don't actually exist are stripped and reported as test gaps, ids are assigned in sequence, and output is always `status: draft` — approval stays a human act in a reviewed PR. Validated against [unjs/defu](https://github.com/unjs/defu): 4 specs, 20 criteria, 19 anchored to existing tests, 0 hallucinated pointers admitted, and `verify` then scored the repo 19 met / 1 uncertain (a real test gap it surfaced).

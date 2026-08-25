@@ -28,7 +28,7 @@ function spec(id: string, overrides: Partial<Spec> = {}): Spec {
 }
 
 function run(specs: Spec[], repoFiles = ["src/a.ts", "tests/a.test.ts"]) {
-  const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "speccheck-lint-"));
+  const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "onspec-lint-"));
   for (const f of repoFiles) {
     fs.mkdirSync(path.dirname(path.join(repoRoot, f)), { recursive: true });
     fs.writeFileSync(path.join(repoRoot, f), "// stub");

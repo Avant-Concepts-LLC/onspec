@@ -28,7 +28,7 @@ import {
 const program = new Command();
 
 program
-  .name("speccheck")
+  .name("onspec")
   .description("Git-native verification layer for spec-driven development. Specs that refuse to drift.")
   .version("0.1.0");
 
@@ -166,7 +166,7 @@ program
       if (!llmAvailable()) {
         console.error(
           pc.red(
-            "no ANTHROPIC_API_KEY found. Either set one, or drive an agent with `speccheck reverse --prompt-only` and feed its JSON back via --from-json.",
+            "no ANTHROPIC_API_KEY found. Either set one, or drive an agent with `onspec reverse --prompt-only` and feed its JSON back via --from-json.",
           ),
         );
         process.exit(2);
@@ -186,7 +186,7 @@ program
         `${result.written.length} draft spec(s), ${result.criteria} criteria, ${result.anchored} anchored to existing tests, ${result.issues.length} hallucinated pointer(s) stripped`,
       ),
     );
-    console.log(pc.dim("drafts are status: draft — review and approve via a normal PR, then run speccheck verify"));
+    console.log(pc.dim("drafts are status: draft — review and approve via a normal PR, then run onspec verify"));
   });
 
 program.parseAsync().catch((err) => {

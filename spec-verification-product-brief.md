@@ -122,3 +122,7 @@ Working shortlist (check domains/trademarks before attachment):
 - **Vouch** — the conformance report vouches for the PR.
 
 Descriptive fallback for the repo/CLI while deciding: `speccheck`.
+
+## Decision log
+
+- **2026-08-24 — Name: `onspec`.** "On spec" = built to specification; name equals the CLI command. Checked available: npm `onspec`, onspec.sh (onspec.dev taken). `speccheck` passed over due to existing Spec Check enterprise-software company (speccheck.com, est. 2004) and taken GitHub org.

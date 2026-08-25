@@ -1,4 +1,4 @@
-name: speccheck
+name: onspec
 description: >-
   Spec conformance for PRs: checks the diff against governing specs/*.spec.md,
   posts a criterion-level verdict table as a PR comment, and flags drift.
@@ -29,7 +29,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Run speccheck
+    - name: Run onspec
       shell: bash
       env:
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
@@ -40,17 +40,17 @@ runs:
         npm run build --silent
         cd "${GITHUB_WORKSPACE}"
 
-        ARGS=(--base "${{ inputs.base }}" --head "${{ inputs.head }}" --format markdown --output speccheck-report.md)
+        ARGS=(--base "${{ inputs.base }}" --head "${{ inputs.head }}" --format markdown --output onspec-report.md)
         [ -n "${{ inputs.test-results }}" ] && ARGS+=(--test-results "${{ inputs.test-results }}")
         [ -z "${ANTHROPIC_API_KEY}" ] && ARGS+=(--no-llm)
         [ "${{ inputs.strict }}" = "true" ] && ARGS+=(--strict)
 
         node "${GITHUB_ACTION_PATH}/dist/cli.js" verify "${ARGS[@]}"
-        DRIFT_ARGS=(--base "${{ inputs.base }}" --head "${{ inputs.head }}" --format markdown --output speccheck-drift.md)
+        DRIFT_ARGS=(--base "${{ inputs.base }}" --head "${{ inputs.head }}" --format markdown --output onspec-drift.md)
         [ "${{ inputs.strict }}" = "true" ] && DRIFT_ARGS+=(--strict)
         node "${GITHUB_ACTION_PATH}/dist/cli.js" drift "${DRIFT_ARGS[@]}" || DRIFT_FAILED=$?
-        cat speccheck-drift.md >> speccheck-report.md
-        cat speccheck-report.md >> "$GITHUB_STEP_SUMMARY"
+        cat onspec-drift.md >> onspec-report.md
+        cat onspec-report.md >> "$GITHUB_STEP_SUMMARY"
         [ "${{ inputs.strict }}" = "true" ] && [ -n "${DRIFT_FAILED:-}" ] && exit 1 || true
     - name: Post PR comment
       if: github.event_name == 'pull_request'
@@ -58,8 +58,8 @@ runs:
       with:
         script: |
           const fs = require('fs');
-          const body = fs.readFileSync('speccheck-report.md', 'utf8');
-          const marker = '<!-- speccheck-report -->';
+          const body = fs.readFileSync('onspec-report.md', 'utf8');
+          const marker = '<!-- onspec-report -->';
           const { data: comments } = await github.rest.issues.listComments({
             ...context.repo, issue_number: context.issue.number,
           });

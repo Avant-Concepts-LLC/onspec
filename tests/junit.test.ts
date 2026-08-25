@@ -19,7 +19,7 @@ const JUNIT = `<?xml version="1.0" encoding="UTF-8"?>
 `;
 
 function writeJUnit(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "speccheck-junit-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "onspec-junit-"));
   const file = path.join(dir, "results.xml");
   fs.writeFileSync(file, JUNIT);
   return file;

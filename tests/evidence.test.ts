@@ -6,7 +6,7 @@ import { resolveEvidence } from "../src/evidence.js";
 import type { Criterion, TestResult } from "../src/types.js";
 
 function tmpRepo(files: Record<string, string>): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "speccheck-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "onspec-"));
   for (const [rel, content] of Object.entries(files)) {
     const full = path.join(dir, rel);
     fs.mkdirSync(path.dirname(full), { recursive: true });
