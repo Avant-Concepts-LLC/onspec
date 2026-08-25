@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>onspec docs</title>
+<meta name="description" content="onspec reference: spec format, evidence pointers, verdict semantics, commands, configuration, and CI setup.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-raised: #11141a;
+    --bg-panel: #0e1116;
+    --line: #1e232c;
+    --line-soft: #171b22;
+    --text: #e8ebef;
+    --text-dim: #9aa3b0;
+    --text-faint: #616a78;
+    --accent: #3ecf8e;
+    --accent-dim: #2a8f64;
+    --met: #3ecf8e;
+    --unmet: #f0716c;
+    --uncertain: #d9a441;
+    --radius: 10px;
+    --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Geist", -apple-system, "Segoe UI", sans-serif;
+    font-size: 15.5px; line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  nav.top {
+    position: sticky; top: 0; z-index: 40; height: 64px;
+    border-bottom: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm {
+    color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 6px 14px; transition: border-color .2s, background .2s;
+  }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  @media (max-width: 720px) { .nav-links a:not(.btn-npm) { display: none; } }
+
+  .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; padding: 48px 0 96px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 0; } }
+
+  .toc { position: sticky; top: 96px; align-self: start; font-size: 13.5px; }
+  .toc a { display: block; padding: 5px 0; color: var(--text-dim); border-left: 2px solid transparent; padding-left: 14px; margin-left: -16px; }
+  .toc a:hover { color: var(--text); }
+  .toc a.sub { padding-left: 28px; font-size: 13px; color: var(--text-faint); }
+  .toc a.sub:hover { color: var(--text-dim); }
+  @media (max-width: 900px) { .toc { display: none; } }
+
+  main { min-width: 0; }
+  main h1 { font-size: 2rem; letter-spacing: -0.03em; font-weight: 700; }
+  main .lede { margin-top: 10px; color: var(--text-dim); max-width: 60ch; }
+  main section { padding-top: 56px; }
+  main h2 { font-size: 1.45rem; letter-spacing: -0.02em; font-weight: 700; padding-bottom: 14px; border-bottom: 1px solid var(--line-soft); }
+  main h3 { font-size: 1.05rem; font-weight: 600; margin-top: 30px; }
+  main h3 code { color: var(--accent); font-size: .95em; }
+  main p { margin-top: 12px; color: var(--text-dim); max-width: 68ch; }
+  main p strong { color: var(--text); }
+  main ul { margin: 12px 0 0 20px; color: var(--text-dim); max-width: 66ch; }
+  main li { margin-top: 6px; }
+  main li strong { color: var(--text); }
+  main code.i {
+    background: var(--bg-raised); border: 1px solid var(--line-soft);
+    border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text);
+    white-space: nowrap;
+  }
+  pre.block {
+    margin-top: 16px; background: var(--bg-panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px 20px; font-size: 12.8px;
+    line-height: 1.7; overflow-x: auto; color: var(--text-dim);
+  }
+  .y-key { color: #7fb3e3; }
+  .y-str { color: var(--text-dim); }
+  .y-accent { color: var(--accent); }
+  .y-comment { color: var(--text-faint); }
+  .t-cmd { color: var(--text); }
+  .t-dim { color: var(--text-faint); }
+
+  .tbl-wrap { margin-top: 16px; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  th { background: var(--bg-panel); color: var(--text); font-weight: 600; white-space: nowrap; }
+  td { color: var(--text-dim); }
+  td code, th code { font-family: "Geist Mono", monospace; font-size: 12.5px; color: var(--text); white-space: nowrap; }
+  .v-met { color: var(--met); font-weight: 600; }
+  .v-unmet { color: var(--unmet); font-weight: 600; }
+  .v-unc { color: var(--uncertain); font-weight: 600; }
+  .v-man { color: #c792ea; font-weight: 600; }
+
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
+  .foot-links { display: flex; gap: 24px; }
+  .foot-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ docs</span></a>
+    <div class="nav-links">
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap layout">
+  <aside class="toc" aria-label="Table of contents">
+    <a href="#start">Getting started</a>
+    <a href="#format">Spec format</a>
+    <a class="sub" href="#fields">Field reference</a>
+    <a href="#evidence">Evidence pointers</a>
+    <a href="#verdicts">Verdict semantics</a>
+    <a href="#commands">Commands</a>
+    <a class="sub" href="#verify">verify</a>
+    <a class="sub" href="#drift">drift</a>
+    <a class="sub" href="#lint">lint</a>
+    <a class="sub" href="#reverse">reverse</a>
+    <a href="#config">Configuration</a>
+    <a href="#ci">CI setup</a>
+    <a href="#data">Data handling</a>
+  </aside>
+
+  <main>
+    <h1>onspec documentation</h1>
+    <p class="lede">Everything here describes v1 behavior exactly. If the tool and this page disagree, that's a bug: <a href="https://github.com/Avant-Concepts-LLC/onspec/issues" style="color: var(--accent)">tell us</a>.</p>
+
+    <section id="start">
+      <h2>Getting started</h2>
+      <p>Install the CLI, write one spec, and verify a change against it.</p>
+      <pre class="block"><span class="t-dim">$</span> <span class="t-cmd">npm install -g onspec</span>
+
+<span class="t-dim"># Have existing code? Draft specs from it instead of starting blank:</span>
+<span class="t-dim">$</span> <span class="t-cmd">onspec reverse</span>
+
+<span class="t-dim"># Grade your specs for verifiability:</span>
+<span class="t-dim">$</span> <span class="t-cmd">onspec lint</span>
+
+<span class="t-dim"># Check the current change against its governing specs:</span>
+<span class="t-dim">$</span> <span class="t-cmd">onspec verify --base origin/main --test-results test-results.xml</span></pre>
+      <p>onspec expects to run inside a git repository. Specs live in a <code class="i">specs/</code> directory at the repo root (configurable), one spec per <code class="i">*.spec.md</code> file.</p>
+    </section>
+
+    <section id="format">
+      <h2>Spec format</h2>
+      <p>A spec is a markdown file with YAML frontmatter. The frontmatter is the machine-checkable contract; everything below it is free-form context for humans and for LLM assessment.</p>
+      <pre class="block"><span class="y-comment"># specs/csv-export.spec.md</span>
+<span class="y-key">id:</span> <span class="y-str">SPEC-0042</span>
+<span class="y-key">title:</span> <span class="y-str">CSV export includes archived records</span>
+<span class="y-key">status:</span> <span class="y-accent">approved</span>
+<span class="y-key">refs:</span>
+  <span class="y-str">- PROJ-123</span>
+<span class="y-key">covers:</span>
+  <span class="y-str">- src/export/**</span>
+<span class="y-key">criteria:</span>
+  <span class="y-key">- id:</span> <span class="y-str">C1</span>
+    <span class="y-key">text:</span> <span class="y-str">Archived records appear when include_archived=true</span>
+    <span class="y-key">verify:</span> <span class="y-accent">test</span>
+    <span class="y-key">evidence:</span> <span class="y-str">tests/export.test.ts::includes archived records</span>
+  <span class="y-key">- id:</span> <span class="y-str">C2</span>
+    <span class="y-key">text:</span> <span class="y-str">Export format constant stays RFC 4180</span>
+    <span class="y-key">verify:</span> <span class="y-accent">assertion</span>
+    <span class="y-key">evidence:</span> <span class="y-str">src/export/csv.ts#FORMAT = "RFC4180"</span>
+<span class="y-key">invariants:</span>
+  <span class="y-str">- Export format remains RFC 4180 compliant</span>
+<span class="y-key">non_goals:</span>
+  <span class="y-str">- Bulk archive/unarchive operations</span></pre>
+
+      <h3 id="fields">Field reference</h3>
+      <div class="tbl-wrap"><table>
+        <tr><th>Field</th><th>Required</th><th>Rules</th></tr>
+        <tr><td><code>id</code></td><td>yes</td><td>Must match <code>SPEC-NNNN</code> (four digits). Unique across the repo; duplicates are reported and only the first file loads.</td></tr>
+        <tr><td><code>title</code></td><td>yes</td><td>Non-empty string.</td></tr>
+        <tr><td><code>status</code></td><td>yes</td><td><code>draft</code>, <code>approved</code>, or <code>superseded</code>. Only approved specs satisfy drift detection; superseded specs are excluded from verification.</td></tr>
+        <tr><td><code>covers</code></td><td>yes</td><td>At least one glob, matched against repo-relative paths (dotfiles included). Defines which changes this spec governs.</td></tr>
+        <tr><td><code>criteria</code></td><td>yes</td><td>At least one. Each has <code>id</code> (<code>C1</code>, <code>C2</code>, ...; unique within the spec), <code>text</code>, <code>verify</code> (<code>test</code> | <code>assertion</code> | <code>manual</code>), and optional <code>evidence</code>.</td></tr>
+        <tr><td><code>refs</code></td><td>no</td><td>External trace links: Jira keys, issue URLs, RFC links. Surfaced in reports; URLs render as links in the PR comment.</td></tr>
+        <tr><td><code>invariants</code></td><td>no</td><td>Statements that must never break. Context for reviewers and LLM assessment.</td></tr>
+        <tr><td><code>non_goals</code></td><td>no</td><td>What this spec deliberately excludes. Keeps generators from over-building and assessors from over-reaching.</td></tr>
+      </table></div>
+      <p>A spec file that fails validation is collected as a parse error and reported; it never aborts loading of the healthy specs.</p>
+    </section>
+
+    <section id="evidence">
+      <h2>Evidence pointers</h2>
+      <p>Each criterion names its own proof. The pointer format depends on <code class="i">verify</code>:</p>
+
+      <h3><code>verify: test</code></h3>
+      <p>Evidence is <code class="i">path/to/test.file::test name</code>. The test name should match what your runner reports; matching is deliberately lenient (name containment plus file matching when the report provides one), so describe-block prefixes like <code class="i">suite &gt; test name</code> resolve correctly.</p>
+      <p>Results come from a JUnit XML report passed via <code class="i">--test-results</code>. Any runner that emits JUnit works: vitest (<code class="i">--reporter=junit</code>), jest (jest-junit), pytest (<code class="i">--junitxml</code>), go test (gotestsum), JUnit itself, and most others.</p>
+
+      <h3><code>verify: assertion</code></h3>
+      <p>Evidence is <code class="i">path/to/file#literal snippet</code>. The criterion is met exactly when the file contains the snippet. A deterministic grep-anchor for facts a test doesn't naturally cover: exported constants, config values, flags.</p>
+
+      <h3><code>verify: manual</code></h3>
+      <p>Evidence is free text describing who checks and how. Manual criteria are never auto-passed; every report surfaces them, and <code class="i">lint</code> warns about them.</p>
+
+      <h3>No evidence</h3>
+      <p>A <code class="i">test</code> or <code class="i">assertion</code> criterion without an evidence pointer falls through to LLM assessment of the diff (when a key is available). It is a visible gap, not an error.</p>
+    </section>
+
+    <section id="verdicts">
+      <h2>Verdict semantics</h2>
+      <p>Deterministic evidence always wins over LLM opinion. The exact resolution rules:</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Condition</th><th>Verdict</th></tr>
+        <tr><td>Named test passed in the JUnit report</td><td class="v-met">met</td></tr>
+        <tr><td>Named test failed in the JUnit report</td><td class="v-unmet">unmet</td></tr>
+        <tr><td>Named test was skipped</td><td class="v-unc">uncertain</td></tr>
+        <tr><td>Evidence test file does not exist, or the test name is not found in it</td><td class="v-unmet">unmet</td></tr>
+        <tr><td>Test exists but no <code>--test-results</code> report was provided</td><td class="v-unc">uncertain</td></tr>
+        <tr><td>Test exists but is absent from the report (e.g. its file crashed)</td><td class="v-unc">uncertain</td></tr>
+        <tr><td>Assertion file contains the snippet</td><td class="v-met">met</td></tr>
+        <tr><td>Assertion file missing, or snippet not found</td><td class="v-unmet">unmet</td></tr>
+        <tr><td><code>verify: manual</code></td><td class="v-man">manual</td></tr>
+        <tr><td>No evidence pointer, no API key</td><td class="v-unc">uncertain</td></tr>
+        <tr><td>No evidence pointer, key present: LLM judges the diff</td><td>met / unmet / uncertain</td></tr>
+      </table></div>
+      <p><strong>The citation rule.</strong> An LLM met or unmet verdict must cite at least one file that actually exists in the repo, or it is downgraded to uncertain. Falsifiable claims only; a bare confident verdict is never accepted.</p>
+      <p><strong>Exit codes.</strong> All commands exit 0 by default (advisory). With <code class="i">--strict</code>: <code class="i">verify</code> exits 1 when any criterion is unmet, <code class="i">drift</code> exits 1 on any finding, <code class="i">lint</code> exits 1 on any error-severity finding. Exit 2 means the command itself failed (bad ref, unreadable input).</p>
+    </section>
+
+    <section id="commands">
+      <h2>Commands</h2>
+
+      <h3 id="verify"><code>onspec verify</code></h3>
+      <p>Finds the specs whose <code class="i">covers</code> globs match the changed files, then produces a verdict per criterion.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Flag</th><th>Meaning</th></tr>
+        <tr><td><code>-b, --base &lt;ref&gt;</code></td><td>Base ref to diff against. Default: config <code>base</code>, then <code>HEAD~1</code>.</td></tr>
+        <tr><td><code>--head &lt;ref&gt;</code></td><td>Head ref. Default: the working tree, including untracked files.</td></tr>
+        <tr><td><code>-t, --test-results &lt;file&gt;</code></td><td>JUnit XML report anchoring test-evidence verdicts.</td></tr>
+        <tr><td><code>--all</code></td><td>Verify every non-superseded spec, not just those governing the diff.</td></tr>
+        <tr><td><code>--no-llm</code></td><td>Skip LLM assessment; evidence-less criteria stay uncertain.</td></tr>
+        <tr><td><code>-m, --model &lt;model&gt;</code></td><td>Model for LLM assessment. Default: <code>claude-opus-5</code>.</td></tr>
+        <tr><td><code>-f, --format &lt;fmt&gt;</code></td><td><code>terminal</code> (default) or <code>markdown</code> (for PR comments).</td></tr>
+        <tr><td><code>-o, --output &lt;file&gt;</code></td><td>Write the report to a file instead of stdout.</td></tr>
+        <tr><td><code>--strict</code></td><td>Exit 1 when any criterion is unmet.</td></tr>
+      </table></div>
+
+      <h3 id="drift"><code>onspec drift</code></h3>
+      <p>Flags changed code that no approved spec governs. Three finding kinds: <strong>unspecced-change</strong> (no spec covers the file), <strong>stale-approval</strong> (only a draft spec covers it), and <strong>superseded-coverage</strong> (only a superseded spec covers it). Fully deterministic; no LLM involved. Takes <code class="i">--base</code>, <code class="i">--head</code>, <code class="i">--format</code>, <code class="i">--output</code>, <code class="i">--strict</code>.</p>
+
+      <h3 id="lint"><code>onspec lint</code></h3>
+      <p>Grades every spec A to F for verifiability. Errors: evidence pointing at a missing file, parse failures. Warnings: dead <code class="i">covers</code> globs, manual criteria, missing evidence pointers. Info: ambiguous wording (can a machine check "quickly"?), missing non-goals or invariants.</p>
+
+      <h3 id="reverse"><code>onspec reverse</code></h3>
+      <p>Reverse-generates draft specs from existing code and tests: the brownfield on-ramp. The LLM only drafts; everything that must be true is enforced deterministically afterwards. Evidence pointers that don't resolve against the real repo are stripped and reported, ids are assigned in sequence after the highest existing spec, and output is always <code class="i">status: draft</code>. Approval is a human act, performed by editing the file in a reviewed PR.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Flag</th><th>Meaning</th></tr>
+        <tr><td><code>--code &lt;globs...&gt;</code></td><td>Source globs to spec. Default: config <code>code</code> globs.</td></tr>
+        <tr><td><code>--tests &lt;globs...&gt;</code></td><td>Test globs to mine for evidence anchors. Default: <code>test/**</code>, <code>tests/**</code>, <code>src/**/*.test.*</code>, <code>src/**/*.spec.*</code>.</td></tr>
+        <tr><td><code>--prompt-only</code></td><td>Print the drafting prompt and exit; drive any agent you already trust.</td></tr>
+        <tr><td><code>--from-json &lt;file&gt;</code></td><td>Skip the built-in LLM call; ingest drafts an agent produced. Validation still runs locally.</td></tr>
+        <tr><td><code>-m, --model &lt;model&gt;</code></td><td>Model for the built-in drafting call. Default: <code>claude-opus-5</code>.</td></tr>
+      </table></div>
+    </section>
+
+    <section id="config">
+      <h2>Configuration</h2>
+      <p>Optional <code class="i">onspec.config.json</code> at the repo root. Every field has a default; the file can be omitted entirely.</p>
+      <pre class="block">{
+  <span class="y-key">"specDir"</span>: <span class="y-str">"specs"</span>,      <span class="y-comment">// where *.spec.md files live</span>
+  <span class="y-key">"code"</span>: [<span class="y-str">"src/**"</span>],     <span class="y-comment">// what counts as code that must be specced (drift scope)</span>
+  <span class="y-key">"base"</span>: <span class="y-str">"HEAD~1"</span>        <span class="y-comment">// default base ref when --base is not passed</span>
+}</pre>
+      <p>The API key is read from the <code class="i">ANTHROPIC_API_KEY</code> environment variable. onspec does not load <code class="i">.env</code> files; source them yourself or export the variable.</p>
+    </section>
+
+    <section id="ci">
+      <h2>CI setup</h2>
+      <h3>GitHub Action</h3>
+      <p>Run your tests with JUnit output, then let the Action post a single self-updating conformance comment on the PR:</p>
+      <pre class="block"><span class="y-comment"># .github/workflows/onspec.yml</span>
+<span class="y-key">name:</span> <span class="y-str">onspec</span>
+<span class="y-key">on:</span> <span class="y-str">[pull_request]</span>
+<span class="y-key">jobs:</span>
+  <span class="y-key">onspec:</span>
+    <span class="y-key">runs-on:</span> <span class="y-str">ubuntu-latest</span>
+    <span class="y-key">permissions:</span>
+      <span class="y-key">contents:</span> <span class="y-str">read</span>
+      <span class="y-key">pull-requests:</span> <span class="y-str">write</span>
+    <span class="y-key">steps:</span>
+      <span class="y-str">- uses: actions/checkout@v5</span>
+        <span class="y-key">with:</span> { <span class="y-key">fetch-depth:</span> <span class="y-str">0</span> }
+      <span class="y-str">- run: npm ci &amp;&amp; npx vitest run --reporter=junit --outputFile=test-results.xml</span>
+      <span class="y-str">- uses: Avant-Concepts-LLC/onspec@v1</span>
+        <span class="y-key">with:</span>
+          <span class="y-key">test-results:</span> <span class="y-str">test-results.xml</span>
+          <span class="y-key">anthropic-api-key:</span> <span class="y-str">${{ secrets.ANTHROPIC_API_KEY }}</span>  <span class="y-comment"># optional</span>
+          <span class="y-key">strict:</span> <span class="y-str">"false"</span>  <span class="y-comment"># advisory first; earn the right to block</span></pre>
+      <div class="tbl-wrap"><table>
+        <tr><th>Input</th><th>Meaning</th></tr>
+        <tr><td><code>base</code> / <code>head</code></td><td>Refs to compare. Default: the PR's base and head SHAs; on push events, falls back to the previous commit.</td></tr>
+        <tr><td><code>test-results</code></td><td>Path to a JUnit XML report produced by an earlier step.</td></tr>
+        <tr><td><code>anthropic-api-key</code></td><td>Enables LLM assessment for evidence-less criteria. Omit it and the Action runs fully offline.</td></tr>
+        <tr><td><code>strict</code></td><td><code>"true"</code> fails the job on unmet criteria or drift. Default <code>"false"</code>.</td></tr>
+      </table></div>
+      <p><code class="i">fetch-depth: 0</code> matters: the diff needs enough history to reach the base ref.</p>
+      <h3>Any other CI</h3>
+      <p>The Action is a thin wrapper. Anywhere else, run the CLI directly:</p>
+      <pre class="block"><span class="t-dim">$</span> <span class="t-cmd">npx onspec verify --base origin/main --test-results results.xml --format markdown --output report.md</span>
+<span class="t-dim">$</span> <span class="t-cmd">npx onspec drift --base origin/main</span></pre>
+      <p>A GitLab CI component is on the <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/ROADMAP.md" style="color: var(--accent)">roadmap</a>.</p>
+    </section>
+
+    <section id="data">
+      <h2>Data handling</h2>
+      <p>Short version: <strong>nothing leaves your machine unless you provide an API key, and then only the minimum, under your own account.</strong></p>
+      <ul>
+        <li><strong>No key:</strong> onspec makes no network calls. All verdicts derive from your repo and your test results.</li>
+        <li><strong>Key set:</strong> for each criterion lacking deterministic evidence, onspec sends Anthropic the git diff and the governing spec's text, and nothing else, directly from your machine or CI runner under your key and your account's data terms. onspec has no server.</li>
+        <li><strong>Never sent:</strong> your full repository, test results, environment variables, or anything for criteria that resolved deterministically. A fully test-anchored spec suite verifies with zero LLM calls.</li>
+        <li><strong><code class="i">reverse</code></strong> sends the source and test files matched by your globs when invoked with a key, since drafting requires reading the code. Prefer not to? <code class="i">--prompt-only</code> plus <code class="i">--from-json</code> keeps drafting inside an agent you already trust, with validation done locally.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">onspec · MIT</span>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
