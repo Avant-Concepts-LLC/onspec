@@ -96,7 +96,7 @@ Config (optional `onspec.config.json`):
 ## GitHub Action
 
 ```yaml
-- uses: Avant-Concepts-LLC/onspec@main
+- uses: Avant-Concepts-LLC/onspec@v1
   with:
     test-results: test-results.xml
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}   # optional
