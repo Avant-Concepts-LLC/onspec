@@ -98,7 +98,10 @@ export async function draftWithLlm(
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const { zodOutputFormat } = await import("@anthropic-ai/sdk/helpers/zod");
   const client = new Anthropic();
-  const response = await client.messages.parse({
+  // Streamed: drafting a whole repo's specs can exceed the SDK's
+  // non-streaming time limit. Structured output still constrains the
+  // shape; we validate through the same zod schema at the end.
+  const stream = client.messages.stream({
     model,
     max_tokens: 32000,
     system:
@@ -106,8 +109,10 @@ export async function draftWithLlm(
     messages: [{ role: "user", content: buildPrompt(code, tests) }],
     output_config: { format: zodOutputFormat(draftsSchema) },
   });
-  if (!response.parsed_output) throw new Error("LLM draft response could not be parsed");
-  return response.parsed_output.specs;
+  const response = await stream.finalMessage();
+  const text = response.content.find((b) => b.type === "text")?.text;
+  if (!text) throw new Error("LLM draft response contained no text");
+  return draftsSchema.parse(JSON.parse(text)).specs;
 }
 
 export interface EvidenceIssue {
