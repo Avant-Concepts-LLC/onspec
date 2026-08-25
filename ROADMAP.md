@@ -26,7 +26,7 @@
 - [x] Housekeeping: checkout/setup-node bumped to Node 24 majors
 - [x] CI-based npm releases via npm Trusted Publishing (OIDC, no token): push a `vX.Y.Z` tag and CI tests, publishes, and moves the `v1` Action tag
 - [ ] Docs on onspec.sh: spec format reference, verdict semantics, CI recipes
-- [ ] GitLab CI component wrapping the CLI (the second ecosystem; the CLI is already host-agnostic)
+- [x] GitLab CI template (`templates/onspec.gitlab-ci.yml`, included via remote URL pinned to `v1`): MR-triggered verify + drift with a self-updating MR note
 - [ ] Remaining admin: email on the domain, trademark knockout search before further brand investment
 
 ## Phase 2 — Validation with real teams

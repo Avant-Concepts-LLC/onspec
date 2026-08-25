@@ -323,7 +323,12 @@
       <p>The Action is a thin wrapper. Anywhere else, run the CLI directly:</p>
       <pre class="block"><span class="t-dim">$</span> <span class="t-cmd">npx onspec verify --base origin/main --test-results results.xml --format markdown --output report.md</span>
 <span class="t-dim">$</span> <span class="t-cmd">npx onspec drift --base origin/main</span></pre>
-      <p>A GitLab CI component is on the <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/ROADMAP.md" style="color: var(--accent)">roadmap</a>.</p>
+      <h3>GitLab CI</h3>
+      <p>Include the maintained template; it runs on merge requests and posts a self-updating MR note when a token is provided:</p>
+      <pre class="block"><span class="y-comment"># .gitlab-ci.yml</span>
+<span class="y-key">include:</span>
+  <span class="y-key">- remote:</span> <span class="y-str">https://raw.githubusercontent.com/Avant-Concepts-LLC/onspec/v1/templates/onspec.gitlab-ci.yml</span></pre>
+      <p>Configure via CI/CD variables: <code class="i">ONSPEC_TEST_RESULTS</code> (path to a JUnit artifact from an earlier job), <code class="i">ANTHROPIC_API_KEY</code> (optional, masked), <code class="i">ONSPEC_GITLAB_TOKEN</code> (project access token with <code class="i">api</code> scope, enables the MR comment; without it the report lands in the job log and as an artifact), and <code class="i">ONSPEC_STRICT</code> (<code class="i">"true"</code> to block).</p>
     </section>
 
     <section id="data">

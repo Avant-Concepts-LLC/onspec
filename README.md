@@ -105,6 +105,15 @@ Config (optional `onspec.config.json`):
 
 Posts a single, self-updating conformance comment on the PR and writes the report to the job summary. See `.github/workflows/onspec.yml` for the full example.
 
+## GitLab CI
+
+```yaml
+include:
+  - remote: https://raw.githubusercontent.com/Avant-Concepts-LLC/onspec/v1/templates/onspec.gitlab-ci.yml
+```
+
+Runs on merge requests. Configure via CI/CD variables: `ONSPEC_TEST_RESULTS` (JUnit artifact path), `ANTHROPIC_API_KEY` (optional), `ONSPEC_GITLAB_TOKEN` (project access token with `api` scope, enables a self-updating MR note), `ONSPEC_STRICT`. See `templates/onspec.gitlab-ci.yml`.
+
 ## Dogfood
 
 This repo verifies itself: `specs/` governs `src/`, and every criterion is anchored to this repo's own tests. Try the canonical demos:

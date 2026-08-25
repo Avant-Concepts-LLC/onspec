@@ -1,0 +1,57 @@
+# onspec: spec conformance for GitLab merge requests.
+#
+# Usage in your .gitlab-ci.yml:
+#
+#   include:
+#     - remote: https://raw.githubusercontent.com/Avant-Concepts-LLC/onspec/v1/templates/onspec.gitlab-ci.yml
+#
+# Optional CI/CD variables:
+#   ONSPEC_TEST_RESULTS   path to a JUnit XML report produced by an earlier job (pass it as an artifact)
+#   ANTHROPIC_API_KEY     enables LLM assessment for criteria without deterministic evidence (masked variable)
+#   ONSPEC_GITLAB_TOKEN   project access token with `api` scope; enables the self-updating MR comment
+#   ONSPEC_STRICT         "true" to fail the job on unmet criteria or drift (advisory by default)
+
+onspec:
+  image: node:22
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    GIT_DEPTH: "0" # the diff needs enough history to reach the MR base
+  script:
+    - BASE="${CI_MERGE_REQUEST_DIFF_BASE_SHA:-HEAD~1}"
+    - ARGS="--base $BASE --format markdown --output onspec-report.md"
+    - |
+      if [ -n "$ONSPEC_TEST_RESULTS" ] && [ -f "$ONSPEC_TEST_RESULTS" ]; then
+        ARGS="$ARGS --test-results $ONSPEC_TEST_RESULTS"
+      fi
+    - if [ -z "$ANTHROPIC_API_KEY" ]; then ARGS="$ARGS --no-llm"; fi
+    - if [ "$ONSPEC_STRICT" = "true" ]; then ARGS="$ARGS --strict"; fi
+    - npx --yes onspec@1 verify $ARGS || VERIFY_FAILED=$?
+    - DRIFT_ARGS="--base $BASE --format markdown --output onspec-drift.md"
+    - if [ "$ONSPEC_STRICT" = "true" ]; then DRIFT_ARGS="$DRIFT_ARGS --strict"; fi
+    - npx --yes onspec@1 drift $DRIFT_ARGS || DRIFT_FAILED=$?
+    - cat onspec-drift.md >> onspec-report.md
+    - cat onspec-report.md
+    # Post or update a single MR note when a token is available
+    - |
+      if [ -n "$ONSPEC_GITLAB_TOKEN" ] && [ -n "$CI_MERGE_REQUEST_IID" ]; then
+        NOTES_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes"
+        BODY=$(node -e "const fs=require('fs');console.log(JSON.stringify({body:'<!-- onspec-report -->\n'+fs.readFileSync('onspec-report.md','utf8')}))")
+        EXISTING=$(curl -s --header "PRIVATE-TOKEN: $ONSPEC_GITLAB_TOKEN" "$NOTES_URL?per_page=100" \
+          | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{const n=JSON.parse(d).find(n=>n.body&&n.body.includes('<!-- onspec-report -->'));console.log(n?n.id:'')}catch{console.log('')}})")
+        if [ -n "$EXISTING" ]; then
+          curl -s -X PUT --header "PRIVATE-TOKEN: $ONSPEC_GITLAB_TOKEN" --header "Content-Type: application/json" --data "$BODY" "$NOTES_URL/$EXISTING" -o /dev/null
+        else
+          curl -s -X POST --header "PRIVATE-TOKEN: $ONSPEC_GITLAB_TOKEN" --header "Content-Type: application/json" --data "$BODY" "$NOTES_URL" -o /dev/null
+        fi
+        echo "MR note posted/updated"
+      else
+        echo "ONSPEC_GITLAB_TOKEN not set: report available above and as a job artifact"
+      fi
+    - if [ -n "$VERIFY_FAILED" ] || [ -n "$DRIFT_FAILED" ]; then exit 1; fi
+  artifacts:
+    paths:
+      - onspec-report.md
+    when: always
+    expire_in: 30 days
