@@ -1,0 +1,25 @@
+# onspec
+
+> onspec is a git-native verification layer for spec-driven development. Specs live as markdown files with YAML frontmatter in a repo's `specs/` directory; on every change, each acceptance criterion gets a met / unmet / uncertain verdict anchored to real evidence (test results via JUnit XML, file-content assertions), with an LLM assessment only for criteria lacking deterministic evidence. Changed code that no approved spec governs is flagged as drift. MIT licensed, zero server-side state.
+
+Install: `npm install -g onspec`. Commands: `verify` (criterion-level conformance verdicts for a diff), `drift` (flags unspecced changes), `lint` (grades specs A-F for verifiability), `reverse` (reverse-generates draft specs from existing code and tests).
+
+Spec files use frontmatter fields: `id` (SPEC-NNNN), `title`, `status` (draft/approved/superseded), `covers` (globs the spec governs), `criteria` (each with `id`, `text`, `verify`: test/assertion/manual, and an optional `evidence` pointer like `tests/export.test.ts::test name` or `src/file.ts#snippet`), plus optional `refs`, `invariants`, `non_goals`.
+
+Agents implementing features in repos that use onspec should: read the governing spec before changing covered files, keep criteria evidence pointers accurate when adding tests, run `onspec verify` before opening a PR, and never set `status: approved` themselves (approval is a human act in a reviewed PR). New specs are written as `status: draft`.
+
+## Docs
+
+- [Documentation](https://onspec.sh/docs): spec format, evidence pointers, exact verdict semantics, command flags, CI setup
+- [README](https://github.com/Avant-Concepts-LLC/onspec#readme): overview, quick start, data handling
+- [Roadmap](https://github.com/Avant-Concepts-LLC/onspec/blob/main/ROADMAP.md): direction and open questions
+
+## Source
+
+- [GitHub repository](https://github.com/Avant-Concepts-LLC/onspec): MIT source, issues
+- [npm package](https://www.npmjs.com/package/onspec): `onspec`
+- [GitHub Action](https://github.com/Avant-Concepts-LLC/onspec/blob/main/action.yml): `uses: Avant-Concepts-LLC/onspec@v1`
+
+## Data handling
+
+Without an API key onspec makes no network calls; all verdicts derive from the repo and test results. With `ANTHROPIC_API_KEY` set, only the diff and governing spec text are sent to the Anthropic API, under the user's own key, and only for criteria lacking deterministic evidence.
