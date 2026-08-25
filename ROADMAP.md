@@ -48,6 +48,7 @@
 - [ ] **Spec composition**: precedence rules when multiple specs cover the same path; monorepo `covers` semantics
 - [ ] **Autonomy policy**: change-class to merge-gate mapping (docs auto-merge on green; schema and auth always get a human). Makes agent autonomy auditable, which is the enterprise conversation-starter
 - [ ] Watch-mode / editor integration exploration: verdicts at edit time, not just PR time
+- [ ] **Local MCP server**: expose structured queries to coding agents mid-session ("which spec governs this file?", "would this diff satisfy C3?") so agents self-correct before the PR instead of after the CI comment. Build only once design partners confirm agents want the structured interface over plain CLI calls
 
 ## Phase 4 — The commercial layer
 
@@ -58,6 +59,7 @@
 - [ ] Hosted LLM verdicts for teams without their own API key, backed by the eval corpus
 - [ ] Jira import: draft criteria from a ticket's acceptance-criteria field (the Jira sibling of `reverse`)
 - [ ] Enterprise traceability: ticket ↔ spec ↔ code ↔ test matrix, audit export, SSO
+- [ ] **Remote MCP server**: the org's spec catalog as a queryable API for every developer's agent ("what approved specs cover the billing service?"). The MCP surface becomes the commercial product's API, not a convenience wrapper
 
 **Sequencing rule:** none of Phase 4 gets built until Phase 2's retention signal says the free layer is sticky. Monetizing an unproven wedge burns it.
 
