@@ -14,7 +14,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
+          # No registry-url: it writes a placeholder auth token into .npmrc
+          # which preempts npm's OIDC (Trusted Publishing) exchange.
       # Trusted Publishing requires a recent npm
       - run: npm install -g npm@latest
       - name: Tag must match package.json version
