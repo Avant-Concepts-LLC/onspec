@@ -64,6 +64,16 @@ Two layers, deterministic first:
 
 `verify: manual` is allowed but visible: the report surfaces it every time, and `onspec lint` warns about it.
 
+## Data handling: what leaves your machine
+
+Short version: **nothing, unless you provide an API key — and then only the minimum, under your own account.**
+
+- **No key set:** onspec makes no network calls. All verdicts come from your repo and your test results. Criteria without deterministic evidence are reported as `uncertain` and say why.
+- **Key set (`ANTHROPIC_API_KEY`):** for each criterion that lacks deterministic evidence, onspec sends the Anthropic API: the git diff being verified, the governing spec's text (title, criterion, context body, non-goals), and nothing else. Requests go directly from your machine or CI runner to Anthropic under **your** key and your account's data terms; onspec has no server and never sees your code or credentials.
+- **What is never sent:** your full repository, test results, environment variables, or anything for criteria that resolved deterministically. A fully test-anchored spec suite verifies with zero LLM calls (this repo does).
+- **`onspec reverse`** is the one command that sends more when invoked with a key: the source and test files matched by your configured globs, since drafting specs requires reading the code. Prefer not to? `onspec reverse --prompt-only` prints the prompt for you to run through any agent you already trust, and `--from-json` ingests the result; onspec then does all validation locally.
+- **In CI**, pass the key as a secret (see below). Omit it and the Action runs fully offline with `--no-llm`.
+
 ## Commands
 
 | Command | What it does | Blocking? |
