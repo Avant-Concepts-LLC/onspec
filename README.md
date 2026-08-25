@@ -86,7 +86,7 @@ Config (optional `onspec.config.json`):
 ## GitHub Action
 
 ```yaml
-- uses: your-org/onspec@main
+- uses: bensubercaseaux/onspec@main
   with:
     test-results: test-results.xml
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}   # optional
