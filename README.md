@@ -34,6 +34,8 @@ Markdown with YAML frontmatter — human-writable, agent-writable, machine-check
 id: SPEC-0042
 title: CSV export includes archived records
 status: approved          # draft | approved | superseded
+refs:                     # optional: trace to your issue tracker
+  - PROJ-123              # Jira key, GitHub issue, RFC URL, ...
 covers:                   # globs the spec governs
   - src/export/**
 criteria:

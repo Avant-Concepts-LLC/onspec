@@ -24,6 +24,12 @@ export interface Spec {
   criteria: Criterion[];
   invariants: string[];
   nonGoals: string[];
+  /**
+   * External references this spec traces to: issue-tracker keys
+   * (PROJ-123), ticket URLs, RFC links. Surfaced in reports so the
+   * spec ↔ ticket ↔ code trace is visible on every PR.
+   */
+  refs?: string[];
   /** Free-form markdown body below the frontmatter. */
   body: string;
   /** Repo-relative path of the spec file. */

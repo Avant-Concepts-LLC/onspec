@@ -32,6 +32,7 @@ export function renderVerifyTerminal(report: VerifyReport): string {
       lines.push("");
       lines.push(pc.bold(`${v.spec.id} — ${v.spec.title}`) + pc.dim(` (${v.spec.path})`));
       if (files.length > 0) lines.push(pc.dim(`  governs: ${files.join(", ")}`));
+      if (v.spec.refs?.length) lines.push(pc.dim(`  refs: ${v.spec.refs.join(", ")}`));
     }
     lines.push(
       `  ${VERDICT_ICON[v.verdict]} ${color(v.verdict, v.verdict.padEnd(9))} ${v.criterion.id}  ${v.criterion.text}`,
@@ -52,6 +53,10 @@ export function renderVerifyMarkdown(report: VerifyReport): string {
   for (const [spec, files] of report.governed) {
     lines.push(`### ${spec.id} — ${spec.title}`);
     if (files.length > 0) lines.push(`_Governs: ${files.map((f) => `\`${f}\``).join(", ")}_`);
+    if (spec.refs?.length) {
+      const linked = spec.refs.map((r) => (/^https?:\/\//.test(r) ? `[${r}](${r})` : r));
+      lines.push(`_Refs: ${linked.join(", ")}_`);
+    }
     lines.push("");
     lines.push("| Criterion | Verdict | Evidence |");
     lines.push("|---|---|---|");

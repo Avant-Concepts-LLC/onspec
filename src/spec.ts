@@ -19,6 +19,7 @@ const frontmatterSchema = z.object({
   criteria: z.array(criterionSchema).min(1),
   invariants: z.array(z.string()).optional().default([]),
   non_goals: z.array(z.string()).optional().default([]),
+  refs: z.array(z.string()).optional().default([]),
 });
 
 export interface LoadResult {
@@ -44,6 +45,7 @@ export function parseSpec(raw: string, specPath: string): Spec {
     criteria: fm.criteria,
     invariants: fm.invariants,
     nonGoals: fm.non_goals,
+    refs: fm.refs,
     body: content.trim(),
     path: specPath,
   };

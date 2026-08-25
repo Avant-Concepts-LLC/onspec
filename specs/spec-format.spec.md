@@ -22,6 +22,10 @@ criteria:
     text: Two specs sharing the same spec id are reported as an error and only the first is loaded
     verify: test
     evidence: tests/spec.test.ts::rejects duplicate spec ids across files
+  - id: C5
+    text: Specs may declare refs to external trackers (issue keys, URLs) which parse into the spec and default to empty
+    verify: test
+    evidence: tests/spec.test.ts::parses refs to external trackers
 invariants:
   - Spec ids follow SPEC-NNNN and criterion ids follow CN
 non_goals:

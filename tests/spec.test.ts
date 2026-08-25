@@ -60,6 +60,16 @@ describe("parseSpec", () => {
   it("rejects malformed spec ids", () => {
     expect(() => parseSpec(VALID.replace("SPEC-0042", "SPEC42"), "s.spec.md")).toThrow();
   });
+
+  it("parses refs to external trackers", () => {
+    const withRefs = VALID.replace(
+      "status: approved",
+      "status: approved\nrefs:\n  - PROJ-123\n  - https://example.com/rfc/42",
+    );
+    const spec = parseSpec(withRefs, "specs/export.spec.md");
+    expect(spec.refs).toEqual(["PROJ-123", "https://example.com/rfc/42"]);
+    expect(parseSpec(VALID, "specs/export.spec.md").refs).toEqual([]);
+  });
 });
 
 describe("loadSpecs", () => {
