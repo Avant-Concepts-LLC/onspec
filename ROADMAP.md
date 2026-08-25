@@ -20,12 +20,14 @@
 
 *Make everything that exists trustworthy and takeable-seriously. Mostly small, mostly sequenced.*
 
-- [ ] GitHub org: dormant-username request for `onspec`, transfer repo, **then** tag `v1` of the Action so `uses: onspec/onspec@v1` is minted once at its permanent address
-- [ ] Exercise the live LLM paths end-to-end with a real API key (`verify` on evidence-less criteria, `reverse` without `--from-json`); tune prompts against real outputs
+- [x] Permanent home: repo lives at `Avant-Concepts-LLC/onspec`; Action `v1` tagged and referenced everywhere (`uses: Avant-Concepts-LLC/onspec@v1`)
+- [x] Live LLM paths exercised end-to-end with a real API key: `verify` judged a controlled met/unmet pair correctly with citations; `reverse` drafted a real repo (5 specs, 36 criteria, 32 anchored, 0 hallucinated pointers) — found and fixed a streaming requirement in the process
+- [x] Data-handling documentation (README section + site one-liner): what leaves the machine, when, under whose account
+- [x] Housekeeping: checkout/setup-node bumped to Node 24 majors
 - [ ] CI-based npm releases (granular token) so publishing doesn't require a human with a security key
 - [ ] Docs on onspec.sh: spec format reference, verdict semantics, CI recipes
 - [ ] GitLab CI component wrapping the CLI (the second ecosystem; the CLI is already host-agnostic)
-- [ ] Housekeeping: bump `actions/checkout` and `setup-node` to current majors, email on the domain, trademark knockout search before further brand investment
+- [ ] Remaining admin: email on the domain, trademark knockout search before further brand investment
 
 ## Phase 2 — Validation with real teams
 
