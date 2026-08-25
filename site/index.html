@@ -316,7 +316,7 @@
 <section id="spec">
   <div class="wrap">
     <h2>A spec is a file in your repo.</h2>
-    <p class="section-body">Markdown with YAML frontmatter. Humans review it in a normal pull request. Agents read it as a work order. onspec checks it forever after.</p>
+    <p class="section-body">Markdown with YAML frontmatter. Humans review it in a normal pull request. Agents read it as a work order. onspec checks it forever after. Non-engineers draft them <a href="/writing-specs" style="color: var(--accent)">with any chat assistant</a>.</p>
     <div class="anatomy reveal">
       <pre class="spec-code"><span class="y-comment"># specs/csv-export.spec.md</span>
 <span class="y-key">id:</span> <span class="y-str">SPEC-0042</span>
@@ -388,7 +388,7 @@ tests, 0 hallucinated pointers admitted</span></pre>
 <section id="why">
   <div class="wrap">
     <h2>The other half of spec-driven development.</h2>
-    <p class="section-body">Plan-to-code is the new shape of software work: anyone who can state intent precisely writes the spec, and agents deliver the feature. A crowded field of tools already handles the front half, turning specs into code.</p>
+    <p class="section-body">Plan-to-code is the new shape of software work: anyone who can state intent precisely <a href="/writing-specs" style="color: var(--accent)">writes the spec</a>, and agents deliver the feature. A crowded field of tools already handles the front half, turning specs into code.</p>
     <p class="section-body" style="margin-top: 16px;">onspec is the back half: proof that the delivery matches the plan, on the day it ships and after every hotfix that follows. Generation made plans cheap to execute. Verification is what makes them safe to trust.</p>
     <p class="section-body" style="margin-top: 16px;">And the two halves close into a loop, because an approved spec with unmet criteria is a machine-readable work order: spec merges, an agent implements, onspec verifies the PR, humans approve the delivery. The spec catalog is the backlog. Nobody maintains a second list.</p>
   </div>
@@ -432,6 +432,7 @@ tests, 0 hallucinated pointers admitted</span></pre>
     <span class="mono">© 2026 <a href="https://avant-concepts.com" style="color: inherit">Avant Concepts LLC</a></span>
     <div class="foot-links">
       <a href="/docs">Docs</a>
+      <a href="/writing-specs">Writing specs</a>
       <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
       <a href="https://www.npmjs.com/package/onspec">npm</a>
       <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE">MIT License</a>
