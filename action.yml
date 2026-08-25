@@ -40,13 +40,20 @@ runs:
         npm run build --silent
         cd "${GITHUB_WORKSPACE}"
 
-        ARGS=(--base "${{ inputs.base }}" --head "${{ inputs.head }}" --format markdown --output onspec-report.md)
+        # On pull_request the defaults are the PR base/head SHAs; on push
+        # events those are empty, so fall back to the previous commit.
+        BASE="${{ inputs.base }}"; [ -z "$BASE" ] && BASE="HEAD~1"
+        HEAD_REF="${{ inputs.head }}"
+
+        ARGS=(--base "$BASE" --format markdown --output onspec-report.md)
+        [ -n "$HEAD_REF" ] && ARGS+=(--head "$HEAD_REF")
         [ -n "${{ inputs.test-results }}" ] && ARGS+=(--test-results "${{ inputs.test-results }}")
         [ -z "${ANTHROPIC_API_KEY}" ] && ARGS+=(--no-llm)
         [ "${{ inputs.strict }}" = "true" ] && ARGS+=(--strict)
 
         node "${GITHUB_ACTION_PATH}/dist/cli.js" verify "${ARGS[@]}"
-        DRIFT_ARGS=(--base "${{ inputs.base }}" --head "${{ inputs.head }}" --format markdown --output onspec-drift.md)
+        DRIFT_ARGS=(--base "$BASE" --format markdown --output onspec-drift.md)
+        [ -n "$HEAD_REF" ] && DRIFT_ARGS+=(--head "$HEAD_REF")
         [ "${{ inputs.strict }}" = "true" ] && DRIFT_ARGS+=(--strict)
         node "${GITHUB_ACTION_PATH}/dist/cli.js" drift "${DRIFT_ARGS[@]}" || DRIFT_FAILED=$?
         cat onspec-drift.md >> onspec-report.md
