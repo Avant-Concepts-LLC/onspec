@@ -36,7 +36,8 @@ runs:
       run: |
         set -euo pipefail
         cd "${GITHUB_ACTION_PATH}"
-        npm ci --omit=dev --silent
+        # Full install: the build step needs devDependencies (tsc, @types/*).
+        npm ci --silent
         npm run build --silent
         cd "${GITHUB_WORKSPACE}"
 
