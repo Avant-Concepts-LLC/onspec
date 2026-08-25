@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>onspec: specs that refuse to drift</title>
+<meta name="description" content="onspec checks every code change against the spec that governs it. Verdicts from tests and evidence, not vibes. Git-native, works with any generator.">
+<meta property="og:title" content="onspec">
+<meta property="og:description" content="Specs that refuse to drift. The verification layer for spec-driven development.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-raised: #11141a;
+    --bg-panel: #0e1116;
+    --line: #1e232c;
+    --line-soft: #171b22;
+    --text: #e8ebef;
+    --text-dim: #9aa3b0;
+    --text-faint: #616a78;
+    --accent: #3ecf8e;
+    --accent-dim: #2a8f64;
+    --met: #3ecf8e;
+    --unmet: #f0716c;
+    --uncertain: #d9a441;
+    --radius: 10px;
+    --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Geist", -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 40;
+    height: 64px;
+    border-bottom: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm {
+    color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 6px 14px; transition: border-color .2s, background .2s;
+  }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  @media (max-width: 720px) { .nav-links a:not(.btn-npm) { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 88px 0 96px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: 56px; align-items: center; }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 48px; } }
+  h1 {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+  h1 .drift { color: var(--text-faint); text-decoration: line-through; text-decoration-color: var(--unmet); text-decoration-thickness: 3px; }
+  .hero-sub { margin-top: 20px; font-size: 1.1rem; color: var(--text-dim); max-width: 42ch; }
+  .hero-ctas { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .install {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-raised); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 11px 16px;
+    font-family: "Geist Mono", monospace; font-size: 14.5px;
+  }
+  .install .dollar { color: var(--text-faint); user-select: none; }
+  .install button {
+    background: none; border: none; cursor: pointer; color: var(--text-dim);
+    font-family: inherit; font-size: 13px; padding: 2px 6px; border-radius: 5px;
+    transition: color .15s;
+  }
+  .install button:hover { color: var(--accent); }
+  .cta-ghost {
+    font-size: 14.5px; color: var(--text-dim); padding: 11px 6px;
+    border-bottom: 1px solid transparent; transition: color .15s;
+  }
+  .cta-ghost:hover { color: var(--text); }
+
+  /* ---------- terminal ---------- */
+  .term {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .6);
+  }
+  .term-bar {
+    padding: 9px 16px; border-bottom: 1px solid var(--line-soft);
+    font-family: "Geist Mono", monospace; font-size: 12px; color: var(--text-faint);
+  }
+  .term pre {
+    padding: 18px 20px; font-size: 12.8px; line-height: 1.75;
+    overflow-x: auto; color: var(--text-dim);
+  }
+  .t-cmd { color: var(--text); }
+  .t-spec { color: var(--text); font-weight: 600; }
+  .t-path { color: var(--text-faint); }
+  .t-met { color: var(--met); }
+  .t-unmet { color: var(--unmet); }
+  .t-unc { color: var(--uncertain); }
+  .t-dim { color: var(--text-faint); }
+  .t-sum { color: var(--text); font-weight: 600; }
+
+  /* ---------- sections ---------- */
+  section { padding: 96px 0; border-top: 1px solid var(--line-soft); }
+  h2 {
+    font-size: clamp(1.7rem, 3.2vw, 2.3rem);
+    letter-spacing: -0.03em; line-height: 1.15; font-weight: 700;
+    max-width: 24ch;
+  }
+  .section-body { margin-top: 14px; color: var(--text-dim); max-width: 58ch; }
+
+  /* verdict model: three offset rows */
+  .layers { margin-top: 56px; display: grid; gap: 0; }
+  .layer {
+    display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 40px; padding: 34px 0;
+  }
+  .layer + .layer { border-top: 1px solid var(--line-soft); }
+  .layer h3 { font-size: 1.15rem; letter-spacing: -0.015em; font-weight: 600; }
+  .layer h3 .k { color: var(--accent); font-family: "Geist Mono", monospace; font-size: .95rem; margin-right: 10px; }
+  .layer p { color: var(--text-dim); font-size: 15.5px; max-width: 52ch; }
+  .layer code.inline {
+    background: var(--bg-raised); border: 1px solid var(--line-soft);
+    border-radius: 5px; padding: 1.5px 7px; font-size: 13px; color: var(--text);
+  }
+  @media (max-width: 720px) { .layer { grid-template-columns: 1fr; gap: 10px; } }
+
+  /* hotfix: full-width story panel */
+  .hotfix-panel {
+    margin-top: 52px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 40px 44px;
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px;
+    align-items: center;
+  }
+  @media (max-width: 860px) { .hotfix-panel { grid-template-columns: 1fr; padding: 28px; } }
+  .hotfix-panel h3 { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.3; font-weight: 650; }
+  .hotfix-panel p { margin-top: 12px; color: var(--text-dim); font-size: 15.5px; }
+  .hotfix-term { background: var(--bg); border: 1px solid var(--line-soft); border-radius: var(--radius-sm); }
+  .hotfix-term pre { padding: 16px 18px; font-size: 12.8px; line-height: 1.8; overflow-x: auto; color: var(--text-dim); }
+
+  /* spec anatomy: code + annotations */
+  .anatomy { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: start; }
+  @media (max-width: 860px) { .anatomy { grid-template-columns: 1fr; } }
+  .spec-code {
+    background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px 24px; font-size: 12.8px; line-height: 1.75; overflow-x: auto;
+  }
+  .y-key { color: #7fb3e3; }
+  .y-str { color: var(--text-dim); }
+  .y-accent { color: var(--accent); }
+  .y-comment { color: var(--text-faint); }
+  .anatomy-notes { display: grid; gap: 26px; align-content: start; padding-top: 6px; }
+  .anatomy-notes h4 { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .anatomy-notes h4 code { color: var(--accent); font-size: 13.5px; }
+  .anatomy-notes p { color: var(--text-dim); font-size: 14.5px; margin-top: 4px; }
+
+  /* commands bento: 1 featured + 3 */
+  .cmds { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .cmd {
+    background: var(--bg-raised); border: 1px solid var(--line-soft);
+    border-radius: var(--radius); padding: 24px;
+    transition: border-color .2s;
+  }
+  .cmd:hover { border-color: var(--line); }
+  .cmd.featured { grid-column: span 3; background: var(--bg-panel); border-color: var(--line); display: grid; grid-template-columns: minmax(0,5fr) minmax(0,7fr); gap: 36px; align-items: center; }
+  @media (max-width: 860px) { .cmds { grid-template-columns: 1fr; } .cmd.featured { grid-column: span 1; grid-template-columns: 1fr; } }
+  .cmd h3 { font-family: "Geist Mono", monospace; font-size: 15.5px; font-weight: 600; }
+  .cmd h3 .c { color: var(--accent); }
+  .cmd p { margin-top: 8px; color: var(--text-dim); font-size: 14.5px; }
+  .cmd .snippet {
+    margin-top: 0; background: var(--bg); border: 1px solid var(--line-soft);
+    border-radius: var(--radius-sm); padding: 14px 16px; font-size: 12.5px; line-height: 1.7;
+    overflow-x: auto; color: var(--text-dim);
+  }
+
+  /* get started */
+  .start-grid { margin-top: 52px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: start; }
+  @media (max-width: 860px) { .start-grid { grid-template-columns: 1fr; } }
+  .start-steps { display: grid; gap: 22px; }
+  .start-steps div h4 { font-size: 15.5px; font-weight: 600; }
+  .start-steps div p { color: var(--text-dim); font-size: 14.5px; margin-top: 3px; }
+  .yaml {
+    background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px 24px; font-size: 12.8px; line-height: 1.75; overflow-x: auto;
+  }
+
+  /* footer */
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
+  .foot-links { display: flex; gap: 24px; }
+  .foot-links a:hover { color: var(--text); }
+
+  /* reveal */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
+    .reveal.in { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="#"><span class="tick">✓</span> onspec</a>
+    <div class="nav-links">
+      <a href="#verdicts">How it works</a>
+      <a href="#spec">Spec format</a>
+      <a href="#start">Get started</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Specs that refuse<br>to <span class="drift">drift</span>.</h1>
+      <p class="hero-sub">onspec checks every code change against the spec that governs it. Verdicts come from tests and evidence, not vibes.</p>
+      <div class="hero-ctas">
+        <div class="install">
+          <span class="dollar">$</span>
+          <span id="install-cmd">npm install -g onspec</span>
+          <button id="copy-btn" aria-label="Copy install command">copy</button>
+        </div>
+        <a class="cta-ghost" href="https://www.npmjs.com/package/onspec">View on npm</a>
+      </div>
+    </div>
+    <div class="term">
+      <div class="term-bar">onspec verify · pull request #142</div>
+      <pre><span class="t-dim">$</span> <span class="t-cmd">onspec verify --test-results results.xml</span>
+
+<span class="t-spec">SPEC-0002</span>  Prototype pollution resistance
+  <span class="t-met">✓ met</span>       C1  Merging untrusted payloads cannot pollute Object.prototype
+              <span class="t-dim">test passed: should not override Object prototype</span>
+  <span class="t-met">✓ met</span>       C2  Inherited enumerable properties are never copied
+              <span class="t-dim">test passed: should ignore inherited enumerable properties</span>
+
+<span class="t-spec">SPEC-0004</span>  Plain-object detection
+  <span class="t-unmet">✗ unmet</span>     C3  ESM namespace objects merge like ordinary objects
+              <span class="t-dim">test failed: works with asterisk-import</span>
+  <span class="t-unc">? uncertain</span> C4  isPlainObject accepts [object Module] values
+              <span class="t-dim">no evidence pointer on criterion</span>
+
+<span class="t-sum">Summary: 2 met · 1 unmet · 1 uncertain (4 criteria)</span></pre>
+    </div>
+  </div>
+</header>
+
+<section id="verdicts">
+  <div class="wrap">
+    <h2>Every criterion gets a verdict. Every verdict cites its evidence.</h2>
+    <p class="section-body">Specs live in your repo as reviewable files. On every pull request, onspec finds the specs that govern the changed code and checks each acceptance criterion.</p>
+    <div class="layers reveal">
+      <div class="layer">
+        <h3>Deterministic evidence first</h3>
+        <p>A criterion that names a test resolves through your CI's JUnit report. The test result <em>is</em> the verdict. Assertion evidence resolves by file content. No model involved, no opinion, same answer every run.</p>
+      </div>
+      <div class="layer">
+        <h3>An LLM only for the gap</h3>
+        <p>Criteria without hard evidence get a Claude assessment of the diff, and it must cite <code class="inline">file:line</code> or the verdict downgrades to uncertain. Falsifiable claims, never bare confidence.</p>
+      </div>
+      <div class="layer">
+        <h3>Drift is refused, not documented</h3>
+        <p>Changed code that no approved spec governs gets flagged: update the spec or revert the code. Documentation drifts silently. A source of truth refuses to.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Built for the 2 a.m. hotfix.</h2>
+    <div class="hotfix-panel reveal">
+      <div>
+        <h3>Someone patches production directly. Next CI run, the spec notices.</h3>
+        <p>The patch ships tonight. But it never becomes invisible: the repo stays in a state where spec and code visibly disagree until a human reconciles them.</p>
+      </div>
+      <div class="hotfix-term">
+        <pre><span class="t-dim">$</span> <span class="t-cmd">onspec drift --base origin/main</span>
+
+<span class="t-unc">⚠ [unspecced-change]</span> src/export/csv.ts changed
+  but no spec covers it. Write the spec or
+  revert the change.
+
+<span class="t-unmet">1 drift finding</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="spec">
+  <div class="wrap">
+    <h2>A spec is a file in your repo.</h2>
+    <p class="section-body">Markdown with YAML frontmatter. Humans review it in a normal pull request. Agents read it as a work order. onspec checks it forever after.</p>
+    <div class="anatomy reveal">
+      <pre class="spec-code"><span class="y-comment"># specs/csv-export.spec.md</span>
+<span class="y-key">id:</span> <span class="y-str">SPEC-0042</span>
+<span class="y-key">title:</span> <span class="y-str">CSV export includes archived records</span>
+<span class="y-key">status:</span> <span class="y-accent">approved</span>
+<span class="y-key">covers:</span>
+  <span class="y-str">- src/export/**</span>
+<span class="y-key">criteria:</span>
+  <span class="y-key">- id:</span> <span class="y-str">C1</span>
+    <span class="y-key">text:</span> <span class="y-str">Archived records appear when include_archived=true</span>
+    <span class="y-key">verify:</span> <span class="y-accent">test</span>
+    <span class="y-key">evidence:</span> <span class="y-str">tests/export.test.ts::includes archived records</span>
+  <span class="y-key">- id:</span> <span class="y-str">C2</span>
+    <span class="y-key">text:</span> <span class="y-str">Export format constant stays RFC 4180</span>
+    <span class="y-key">verify:</span> <span class="y-accent">assertion</span>
+    <span class="y-key">evidence:</span> <span class="y-str">src/export/csv.ts#FORMAT = "RFC4180"</span>
+<span class="y-key">non_goals:</span>
+  <span class="y-str">- Bulk archive operations</span></pre>
+      <div class="anatomy-notes">
+        <div>
+          <h4><code>covers</code> maps specs to code</h4>
+          <p>Globs decide which spec governs a change. That mapping powers both conformance checks and drift detection.</p>
+        </div>
+        <div>
+          <h4><code>evidence</code> makes criteria checkable</h4>
+          <p>Each criterion names its own proof: a test, a code assertion, or an honest manual check that the report will keep surfacing.</p>
+        </div>
+        <div>
+          <h4><code>status</code> is the human gate</h4>
+          <p>Only approved specs govern code. Approval happens by editing the file in a reviewed pull request, nowhere else.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Four commands. Zero infrastructure.</h2>
+    <p class="section-body">A CLI that runs locally and in any CI. Everything derives from the repo: no server, no account, no state anywhere else.</p>
+    <div class="cmds reveal">
+      <div class="cmd featured">
+        <div>
+          <h3>onspec <span class="c">reverse</span></h3>
+          <p>The brownfield on-ramp. Reverse-generates draft specs from existing code and tests, anchoring every criterion it can to a test that already exists. Hallucinated evidence pointers are stripped before they ever reach a file.</p>
+        </div>
+        <pre class="snippet"><span class="t-dim">$</span> <span class="t-cmd">onspec reverse</span>
+<span class="t-met">✓</span> wrote specs/defaults-merging-semantics.spec.md
+<span class="t-met">✓</span> wrote specs/prototype-pollution-resistance.spec.md
+<span class="t-dim">4 draft specs, 20 criteria, 19 anchored to existing
+tests, 0 hallucinated pointers admitted</span></pre>
+      </div>
+      <div class="cmd">
+        <h3>onspec <span class="c">verify</span></h3>
+        <p>Criterion-by-criterion conformance verdicts for the current diff, posted as one PR comment.</p>
+      </div>
+      <div class="cmd">
+        <h3>onspec <span class="c">drift</span></h3>
+        <p>Flags changed code that no approved spec governs. Advisory by default, blocking when you have earned it.</p>
+      </div>
+      <div class="cmd">
+        <h3>onspec <span class="c">lint</span></h3>
+        <p>Grades each spec A to F on verifiability: ambiguous wording, dead globs, missing evidence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2>In your CI in one commit.</h2>
+    <div class="start-grid reveal">
+      <div class="start-steps">
+        <div>
+          <h4>Write one spec</h4>
+          <p>Or point <span class="mono">onspec reverse</span> at your existing code and review its drafts.</p>
+        </div>
+        <div>
+          <h4>Add the workflow</h4>
+          <p>The Action posts a self-updating conformance comment on every pull request.</p>
+        </div>
+        <div>
+          <h4>Stay advisory until trusted</h4>
+          <p>Default exit code is 0. Flip <span class="mono">strict</span> when the team wants the gate.</p>
+        </div>
+      </div>
+      <pre class="yaml"><span class="y-comment"># .github/workflows/onspec.yml</span>
+<span class="y-key">on:</span> <span class="y-str">pull_request</span>
+<span class="y-key">jobs:</span>
+  <span class="y-key">onspec:</span>
+    <span class="y-key">runs-on:</span> <span class="y-str">ubuntu-latest</span>
+    <span class="y-key">steps:</span>
+      <span class="y-str">- uses: actions/checkout@v4</span>
+      <span class="y-str">- run: npm ci && npm run test:junit</span>
+      <span class="y-str">- uses: onspec/onspec@v1</span>
+        <span class="y-key">with:</span>
+          <span class="y-key">test-results:</span> <span class="y-str">test-results.xml</span></pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">onspec · MIT</span>
+    <div class="foot-links">
+      <a href="https://www.npmjs.com/package/onspec">npm</a>
+      <a href="mailto:hello@onspec.sh">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("copy-btn").addEventListener("click", async () => {
+    const btn = document.getElementById("copy-btn");
+    try {
+      await navigator.clipboard.writeText(document.getElementById("install-cmd").textContent);
+      btn.textContent = "copied";
+      setTimeout(() => (btn.textContent = "copy"), 1600);
+    } catch { btn.textContent = "copy"; }
+  });
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")),
+      { threshold: 0.15 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  } else {
+    document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+  }
+</script>
+
+</body>
+</html>
