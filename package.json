@@ -43,5 +43,13 @@
     "verification",
     "drift",
     "ci"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Avant-Concepts-LLC/onspec.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Avant-Concepts-LLC/onspec/issues"
+  },
+  "homepage": "https://onspec.sh"
 }
