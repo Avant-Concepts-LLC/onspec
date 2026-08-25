@@ -1,0 +1,37 @@
+name: release
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to move the v1 major tag after publishing
+      id-token: write # npm Trusted Publishing (OIDC) — no token secret needed
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      # Trusted Publishing requires a recent npm
+      - run: npm install -g npm@latest
+      - name: Tag must match package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::tag v$TAG does not match package.json version $PKG"
+            exit 1
+          fi
+      - run: npm ci
+      # prepublishOnly runs the build and full test suite before anything ships
+      - run: npm publish
+      - name: Move the major tag (keeps uses:@v1 current)
+        run: |
+          MAJOR="v$(node -p "require('./package.json').version.split('.')[0]")"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f "$MAJOR" "$GITHUB_SHA"
+          git push origin "$MAJOR" --force

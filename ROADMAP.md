@@ -24,7 +24,7 @@
 - [x] Live LLM paths exercised end-to-end with a real API key: `verify` judged a controlled met/unmet pair correctly with citations; `reverse` drafted a real repo (5 specs, 36 criteria, 32 anchored, 0 hallucinated pointers) — found and fixed a streaming requirement in the process
 - [x] Data-handling documentation (README section + site one-liner): what leaves the machine, when, under whose account
 - [x] Housekeeping: checkout/setup-node bumped to Node 24 majors
-- [ ] CI-based npm releases (granular token) so publishing doesn't require a human with a security key
+- [x] CI-based npm releases via npm Trusted Publishing (OIDC, no token): push a `vX.Y.Z` tag and CI tests, publishes, and moves the `v1` Action tag
 - [ ] Docs on onspec.sh: spec format reference, verdict semantics, CI recipes
 - [ ] GitLab CI component wrapping the CLI (the second ecosystem; the CLI is already host-agnostic)
 - [ ] Remaining admin: email on the domain, trademark knockout search before further brand investment
