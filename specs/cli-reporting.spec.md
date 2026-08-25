@@ -20,6 +20,10 @@ criteria:
     text: In strict mode, verify exits nonzero when any criterion is unmet
     verify: assertion
     evidence: src/cli.ts#if (opts.strict && unmet > 0) process.exit(1);
+  - id: C4
+    text: The json report format exposes per-criterion verdicts and a summary for machine consumers
+    verify: test
+    evidence: tests/report.test.ts::json report exposes verdicts and summary for machine consumers
 invariants:
   - Default exit code is 0 (advisory) — blocking is opt-in via --strict
 non_goals:

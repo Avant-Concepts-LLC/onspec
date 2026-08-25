@@ -255,7 +255,7 @@
         <tr><td><code>--all</code></td><td>Verify every non-superseded spec, not just those governing the diff.</td></tr>
         <tr><td><code>--no-llm</code></td><td>Skip LLM assessment; evidence-less criteria stay uncertain.</td></tr>
         <tr><td><code>-m, --model &lt;model&gt;</code></td><td>Model for LLM assessment. Default: <code>claude-opus-5</code>.</td></tr>
-        <tr><td><code>-f, --format &lt;fmt&gt;</code></td><td><code>terminal</code> (default) or <code>markdown</code> (for PR comments).</td></tr>
+        <tr><td><code>-f, --format &lt;fmt&gt;</code></td><td><code>terminal</code> (default), <code>markdown</code> (for PR comments), or <code>json</code> (machine-readable, for dispatchers and tooling).</td></tr>
         <tr><td><code>-o, --output &lt;file&gt;</code></td><td>Write the report to a file instead of stdout.</td></tr>
         <tr><td><code>--strict</code></td><td>Exit 1 when any criterion is unmet.</td></tr>
       </table></div>
@@ -319,6 +319,8 @@
         <tr><td><code>strict</code></td><td><code>"true"</code> fails the job on unmet criteria or drift. Default <code>"false"</code>.</td></tr>
       </table></div>
       <p><code class="i">fetch-depth: 0</code> matters: the diff needs enough history to reach the base ref.</p>
+      <h3>Closing the loop: dispatch</h3>
+      <p>An approved spec with unmet criteria is a machine-readable work order. The <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/recipes/dispatch.yml" style="color: var(--accent)">reference dispatch workflow</a> watches merges to <code class="i">specs/</code>, runs <code class="i">verify --all --format json</code>, and opens a work-order issue for each newly approved spec whose criteria aren't yet delivered. Point any coding agent (or human) at the <code class="i">onspec-dispatch</code> label and the loop closes: spec approved, agent implements, onspec verifies the PR, humans merge.</p>
       <h3>Any other CI</h3>
       <p>The Action is a thin wrapper. Anywhere else, run the CLI directly:</p>
       <pre class="block"><span class="t-dim">$</span> <span class="t-cmd">npx onspec verify --base origin/main --test-results results.xml --format markdown --output report.md</span>

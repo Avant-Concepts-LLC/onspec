@@ -21,6 +21,7 @@ import {
 import {
   renderDrift,
   renderLint,
+  renderVerifyJson,
   renderVerifyMarkdown,
   renderVerifyTerminal,
 } from "./report.js";
@@ -74,7 +75,7 @@ program
   .option("--all", "verify every spec, not just those governing the diff", false)
   .option("--no-llm", "skip LLM assessment for criteria without deterministic evidence")
   .option("-m, --model <model>", "model for LLM assessment", DEFAULT_MODEL)
-  .option("-f, --format <fmt>", "terminal | markdown", "terminal")
+  .option("-f, --format <fmt>", "terminal | markdown | json", "terminal")
   .option("-o, --output <file>", "write report to a file instead of stdout")
   .option("--strict", "exit 1 when any criterion is unmet", false)
   .action(async (opts) => {
@@ -96,10 +97,13 @@ program
       model: opts.model,
       all: opts.all,
     });
-    emit(
-      opts.format === "markdown" ? renderVerifyMarkdown(report) : renderVerifyTerminal(report),
-      opts,
-    );
+    const rendered =
+      opts.format === "markdown"
+        ? renderVerifyMarkdown(report)
+        : opts.format === "json"
+          ? renderVerifyJson(report)
+          : renderVerifyTerminal(report);
+    emit(rendered, opts);
     const unmet = report.verdicts.filter((v) => v.verdict === "unmet").length;
     if (opts.strict && unmet > 0) process.exit(1);
   });

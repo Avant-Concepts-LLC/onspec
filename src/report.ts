@@ -72,6 +72,42 @@ export function renderVerifyMarkdown(report: VerifyReport): string {
   return lines.join("\n");
 }
 
+/** Machine-readable verdicts, for dispatchers and other tooling. */
+export function renderVerifyJson(report: VerifyReport): string {
+  const specs = [...report.governed.keys()].map((spec) => ({
+    id: spec.id,
+    title: spec.title,
+    status: spec.status,
+    path: spec.path,
+    refs: spec.refs ?? [],
+    criteria: report.verdicts
+      .filter((v) => v.spec === spec)
+      .map((v) => ({
+        id: v.criterion.id,
+        text: v.criterion.text,
+        verdict: v.verdict,
+        reason: v.reason,
+        evidence: v.evidenceRef ?? null,
+        source: v.source,
+      })),
+  }));
+  const count = (x: Verdict) => report.verdicts.filter((v) => v.verdict === x).length;
+  return JSON.stringify(
+    {
+      specs,
+      summary: {
+        met: count("met"),
+        unmet: count("unmet"),
+        uncertain: count("uncertain"),
+        manual: count("manual"),
+        total: report.verdicts.length,
+      },
+    },
+    null,
+    2,
+  );
+}
+
 function summaryLine(verdicts: CriterionVerdict[], colored = true): string {
   const count = (v: Verdict) => verdicts.filter((x) => x.verdict === v).length;
   const parts = [
