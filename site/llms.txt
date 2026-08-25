@@ -11,6 +11,7 @@ Agents implementing features in repos that use onspec should: read the governing
 ## Docs
 
 - [Documentation](https://onspec.sh/docs): spec format, evidence pointers, exact verdict semantics, command flags, CI setup
+- [Writing specs with AI](https://onspec.sh/writing-specs): the drafting prompt for chat assistants and the browser-only authoring path for non-engineers
 - [README](https://github.com/Avant-Concepts-LLC/onspec#readme): overview, quick start, data handling
 - [Roadmap](https://github.com/Avant-Concepts-LLC/onspec/blob/main/ROADMAP.md): direction and open questions
 

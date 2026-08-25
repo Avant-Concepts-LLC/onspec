@@ -2,4 +2,5 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://onspec.sh/</loc></url>
   <url><loc>https://onspec.sh/docs</loc></url>
+  <url><loc>https://onspec.sh/writing-specs</loc></url>
 </urlset>

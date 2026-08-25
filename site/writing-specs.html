@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing specs with AI</title>
+<meta name="description" content="How product managers and anyone stating intent can draft onspec specs with a chat assistant: the copy-paste prompt, what makes criteria checkable, and the no-IDE path from draft to merged.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-raised: #11141a;
+    --bg-panel: #0e1116;
+    --line: #1e232c;
+    --line-soft: #171b22;
+    --text: #e8ebef;
+    --text-dim: #9aa3b0;
+    --text-faint: #616a78;
+    --accent: #3ecf8e;
+    --accent-dim: #2a8f64;
+    --unmet: #f0716c;
+    --radius: 10px;
+    --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Geist", -apple-system, "Segoe UI", sans-serif;
+    font-size: 15.5px; line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  nav.top {
+    position: sticky; top: 0; z-index: 40; height: 64px;
+    border-bottom: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm {
+    color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 6px 14px; transition: border-color .2s, background .2s;
+  }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  @media (max-width: 720px) { .nav-links a:not(.btn-npm) { display: none; } }
+
+  article { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  h1 { font-size: 2rem; letter-spacing: -0.03em; font-weight: 700; }
+  .lede { margin-top: 10px; color: var(--text-dim); font-size: 1.05rem; }
+  h2 { font-size: 1.35rem; letter-spacing: -0.02em; font-weight: 700; margin-top: 56px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+  p { margin-top: 14px; color: var(--text-dim); }
+  p strong { color: var(--text); }
+  ol, ul { margin: 14px 0 0 22px; color: var(--text-dim); }
+  li { margin-top: 8px; }
+  li strong { color: var(--text); }
+  code.i {
+    background: var(--bg-raised); border: 1px solid var(--line-soft);
+    border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text);
+  }
+  pre.block {
+    margin-top: 16px; background: var(--bg-panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 20px 22px; font-size: 12.8px;
+    line-height: 1.7; overflow-x: auto; color: var(--text-dim);
+    white-space: pre-wrap;
+  }
+  .prompt-head {
+    margin-top: 16px; display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-panel); border: 1px solid var(--line); border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0; padding: 10px 22px;
+    font-family: "Geist Mono", monospace; font-size: 12px; color: var(--text-faint);
+  }
+  .prompt-head button {
+    background: none; border: 1px solid var(--line); border-radius: 5px; cursor: pointer;
+    color: var(--text-dim); font-family: inherit; font-size: 12px; padding: 4px 12px;
+    transition: color .15s, border-color .15s;
+  }
+  .prompt-head button:hover { color: var(--accent); border-color: var(--accent-dim); }
+  .prompt-head + pre.block { margin-top: 0; border-radius: 0 0 var(--radius) var(--radius); }
+  .good { color: var(--accent); }
+  .bad { color: var(--unmet); }
+  .pair { margin-top: 14px; display: grid; gap: 10px; }
+  .pair div {
+    background: var(--bg-panel); border: 1px solid var(--line-soft); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 14px; color: var(--text-dim);
+  }
+  .pair .label { font-family: "Geist Mono", monospace; font-size: 11.5px; margin-right: 10px; }
+
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
+  .foot-links { display: flex; gap: 24px; }
+  .foot-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ writing specs</span></a>
+    <div class="nav-links">
+      <a href="/docs">Docs</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <h1>Writing specs with AI</h1>
+  <p class="lede">For product managers, engineering managers, and anyone whose job is stating intent. No IDE, no terminal, no YAML expertise required.</p>
+
+  <p>An onspec spec is a short structured file: what the feature does, stated as criteria a machine can check. You don't write that structure by hand. You describe the feature to an AI assistant, it drafts the file, and your judgment goes where it matters: answering the questions the structure forces. What's the actual pass/fail behavior? What is this feature deliberately <em>not</em> doing?</p>
+
+  <h2>The prompt</h2>
+  <p>Paste this into Claude, ChatGPT, or any assistant, then add your feature description at the bottom.</p>
+
+  <div class="prompt-head"><span>spec drafting prompt</span><button id="copy-prompt">copy</button></div>
+  <pre class="block" id="prompt-text">You are helping me draft a spec for onspec (onspec.sh): a markdown file with YAML frontmatter defining acceptance criteria for a software feature. My team will review it in a pull request, and it will then be verified automatically against the code, so every criterion must be a single, concretely checkable behavior.
+
+Rules:
+- Output one complete file in a code block, nothing else after your questions are answered.
+- Frontmatter fields: id (placeholder SPEC-XXXX), title, status: draft, covers (path globs if I name code areas, otherwise a single "TODO-engineering-to-fill" entry), criteria, invariants, non_goals.
+- Each criterion: id (C1, C2, ...), text (one observable behavior a test could pass or fail), verify: test, and NO evidence field. Engineers anchor criteria to tests during implementation.
+- Reject vague wording in criteria: no "fast", "user-friendly", "properly", "seamless", "handle gracefully". Behavior, inputs, outputs.
+- If my description is ambiguous or incomplete, ask me up to 3 clarifying questions BEFORE drafting. Prefer asking over assuming.
+- non_goals are required: what this feature deliberately does not do, from my description or your questions.
+- Do not invent numbers, limits, or behaviors I did not state or confirm.
+- Below the frontmatter, add a short context section: why this exists, key decisions, anything a future maintainer needs.
+
+My feature description:
+[describe your feature here]</pre>
+
+  <h2>What "checkable" means</h2>
+  <p>The whole system rests on criteria a machine can decide. The assistant enforces this, but you'll review its work, so calibrate your eye:</p>
+  <div class="pair">
+    <div><span class="label bad">✗ vague</span>Export should be fast and handle large files gracefully.</div>
+    <div><span class="label good">✓ checkable</span>Exporting 50,000 rows completes without error and produces one row per record.</div>
+    <div><span class="label bad">✗ vague</span>Archived records are handled properly.</div>
+    <div><span class="label good">✓ checkable</span>Archived records appear in the export when include_archived=true; the default export excludes them.</div>
+  </div>
+  <p>The <code class="i">non_goals</code> list is just as load-bearing: it's the fence that keeps an implementing agent from over-building, and the record of scope decisions your team actually made.</p>
+
+  <h2>From draft to merged, in the browser</h2>
+  <ol>
+    <li><strong>Open your repo on GitHub</strong> → <code class="i">specs/</code> folder → Add file → Create new file. Name it something like <code class="i">csv-export.spec.md</code>, paste the draft.</li>
+    <li><strong>Propose the file.</strong> GitHub turns it into a pull request. This PR is where your team debates the intent, in rendered markdown, with comments, like any document review.</li>
+    <li><strong>Engineering fills the blanks during review:</strong> the real <code class="i">covers</code> globs, the spec id, and later, evidence pointers as tests get written. <code class="i">onspec lint</code> grades the spec's readiness.</li>
+    <li><strong>Approval is explicit.</strong> When the team agrees, the status line changes to <code class="i">approved</code> in the reviewed PR and it merges. From that moment the spec governs the code, and every future change to covered code is checked against it.</li>
+  </ol>
+  <p>If your team runs the <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/recipes/dispatch.yml" style="color: var(--accent)">dispatch workflow</a>, that merge also opens the implementation work order automatically. Your spec doesn't describe the work. It <em>is</em> the work.</p>
+
+  <h2>Two habits that keep the system honest</h2>
+  <ul>
+    <li><strong>The AI drafts, you decide.</strong> Read every criterion asking "is this what I meant, and could it pass while the feature is still wrong?" That question is the job.</li>
+    <li><strong>Never mark your own spec approved.</strong> Drafts become approved through team review, and never by the person or agent who wrote them. That separation is what makes the whole verification chain mean something.</li>
+  </ul>
+</article>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">© 2026 <a href="https://avant-concepts.com" style="color: inherit">Avant Concepts LLC</a></span>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("copy-prompt").addEventListener("click", async () => {
+    const btn = document.getElementById("copy-prompt");
+    try {
+      await navigator.clipboard.writeText(document.getElementById("prompt-text").textContent);
+      btn.textContent = "copied";
+      setTimeout(() => (btn.textContent = "copy"), 1600);
+    } catch { btn.textContent = "copy"; }
+  });
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
