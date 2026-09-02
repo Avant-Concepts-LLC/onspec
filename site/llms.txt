@@ -20,6 +20,8 @@ Agents implementing features in repos that use onspec should: read the governing
 - [GitHub repository](https://github.com/Avant-Concepts-LLC/onspec): MIT source, issues
 - [npm package](https://www.npmjs.com/package/onspec): `onspec`
 - [GitHub Action](https://github.com/Avant-Concepts-LLC/onspec/blob/main/action.yml): `uses: Avant-Concepts-LLC/onspec@v1`
+- [GitLab CI template](https://github.com/Avant-Concepts-LLC/onspec/blob/main/templates/onspec.gitlab-ci.yml): `include: remote:` pinned to `v1`; MR-triggered verify + drift with a self-updating MR note
+- [How a change is verified](https://onspec.sh/#how): one-page diagram of spec → diff → verdict lanes (test, assertion, model, manual) → report, with drift and the reverse on-ramp
 
 ## Data handling
 
