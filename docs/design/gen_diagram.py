@@ -222,3 +222,10 @@ here = os.path.dirname(os.path.abspath(__file__))
 open(os.path.join(here, "Onspec How It Works.dc.html"), "w").write(doc)
 open(os.path.join(here, "how-it-works.embed.html"), "w").write(embed)
 print(here, len(doc), len(embed))
+# Keep the live site in step: replace the marked block in site/index.html when it exists.
+site = os.path.join(here, "..", "..", "site", "index.html")
+if os.path.exists(site):
+    html = open(site).read(); a, b = "<!-- how-it-works:start -->\n", "<!-- how-it-works:end -->"
+    if a in html and b in html:
+        html = html[:html.index(a) + len(a)] + embed + html[html.index(b):]
+        open(site, "w").write(html); print("site/index.html updated")
