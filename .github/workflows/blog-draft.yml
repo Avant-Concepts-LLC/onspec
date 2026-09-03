@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
     inputs:
       lookback_days:
-        description: "Only cite sources published within this many days"
-        default: "45"
+        description: "Only cite sources published within this many days (blank = the site's own default)"
+        default: ""
       dry_run:
         description: "Research and draft, but open no PR (the draft is attached as a run artifact)"
         type: boolean
@@ -26,7 +26,7 @@ concurrency:
 jobs:
   draft:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       # OUT holds draft.json / summary.json / pr-body.md. It is set here rather than in a job-level
       # `env:` block because the `runner` context is not available there.
@@ -39,7 +39,7 @@ jobs:
       - name: Research and draft
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          BLOG_LOOKBACK_DAYS: ${{ inputs.lookback_days || '45' }}
+          BLOG_LOOKBACK_DAYS: ${{ inputs.lookback_days }}
           BLOG_DRY_RUN: ${{ inputs.dry_run == true && '1' || '' }}
           BLOG_OUT_DIR: ${{ env.OUT }}
         run: npx tsx scripts/blog-draft.mts

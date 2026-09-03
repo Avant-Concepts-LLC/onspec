@@ -59,6 +59,17 @@ interface Draft {
 
 const ALL_BLOCK_TYPES: BlockType[] = ["lead", "h2", "p", "pull", "list", "code", "closing"];
 const MAX_SEARCHES = 8;
+const MAX_TURNS = 4;
+
+/**
+ * A research turn normally finishes in 4 to 11 minutes. One avantconcepts run hung with no
+ * output until the 30-minute job timeout killed it, taking the artifact with it — the SDK's
+ * default timeout does not bound a stalled stream usefully here. So: bound one request, bound
+ * the retry, and bound the whole research phase, all under the workflow's job timeout, so a
+ * stall fails as a clear error with its outputs written rather than as a killed job.
+ */
+const REQUEST_TIMEOUT_MS = Math.max(60_000, parseInt(process.env.BLOG_REQUEST_TIMEOUT_MS || "", 10) || 15 * 60_000);
+const DEADLINE_MS = Math.max(REQUEST_TIMEOUT_MS, parseInt(process.env.BLOG_DEADLINE_MS || "", 10) || 32 * 60_000);
 
 /**
  * Read a voice guide out of a markdown file, dropping the human-facing header so only the
@@ -301,12 +312,17 @@ function extractDraftJson(text: string): Draft {
 }
 
 async function researchAndDraft(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; model: string; outDir: string }): Promise<Draft> {
-  const client = new Anthropic();
+  const client = new Anthropic({ timeout: REQUEST_TIMEOUT_MS, maxRetries: 1 });
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: buildPrompt(opts) }];
   let message: Anthropic.Message | undefined;
+  const startedAt = Date.now();
   // Server-side web search runs its own sampling loop; a long research turn can come back as
   // pause_turn. Re-send the conversation as-is and the server resumes where it left off.
-  for (let turn = 0; turn < 4; turn++) {
+  for (let turn = 0; turn < MAX_TURNS; turn++) {
+    const elapsed = Date.now() - startedAt;
+    if (elapsed > DEADLINE_MS) {
+      throw new Error(`Research passed its ${Math.round(DEADLINE_MS / 60000)}-minute deadline after ${turn} turn(s); giving up rather than being killed by the job timeout`);
+    }
     const stream = client.messages.stream({
       model: opts.model,
       max_tokens: 32000,
