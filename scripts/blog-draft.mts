@@ -146,7 +146,7 @@ const SITE = {
   words: [800, 1200] as const,
   // Papers, releases and benchmark updates land less often than monthly market data,
   // so 45 days left too little primary material to cite and a run failed with zero sources.
-  lookbackDays: 90 as number | undefined,
+  lookbackDays: 90,
   blockTypes: ["lead", "h2", "p", "list", "code", "closing"] as BlockType[],
   checklist: [
     "Code and spec examples are correct (spec frontmatter matches the docs page)",
@@ -432,7 +432,9 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const dryRun = args.dryRun || process.env.BLOG_DRY_RUN === "1";
   // A site whose subject moves slowly needs a wider window to find enough primary material.
-  const siteDefault = SITE.lookbackDays ?? 45;
+  // Read structurally: `lookbackDays` is optional, and most adapters leave it off. Reading it
+  // as a declared property broke `next build` in the repos that type-check scripts/.
+  const siteDefault = (SITE as { lookbackDays?: number }).lookbackDays ?? 45;
   const lookbackDays = Math.max(7, args.lookback || parseInt(process.env.BLOG_LOOKBACK_DAYS || "", 10) || siteDefault);
   const model = process.env.BLOG_MODEL || "claude-sonnet-5";
   const outDir = process.env.BLOG_OUT_DIR || path.join(os.tmpdir(), "blog-draft");
