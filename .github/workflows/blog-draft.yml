@@ -1,0 +1,72 @@
+name: Blog draft
+# Monthly research-and-draft agent. scripts/blog-draft.mts researches recent sources with Claude,
+# writes the post into the repo, and this workflow commits it to blog/draft-<slug> and opens a PR
+# for human review. Same workflow in every sibling repo — see ~/Websites/home/docs/blog-pipeline.md.
+on:
+  schedule:
+    - cron: "0 13 1 * *"   # 1st of each month, 13:00 UTC (9am ET)
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: "Only cite sources published within this many days"
+        default: "45"
+      dry_run:
+        description: "Research and draft, but open no PR (the draft is attached as a run artifact)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: blog-draft
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OUT: ${{ runner.temp }}/blog-draft
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - name: Research and draft
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BLOG_LOOKBACK_DAYS: ${{ inputs.lookback_days || '45' }}
+          BLOG_DRY_RUN: ${{ inputs.dry_run == true && '1' || '' }}
+          BLOG_OUT_DIR: ${{ env.OUT }}
+        run: npx tsx scripts/blog-draft.mts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blog-draft
+          path: ${{ env.OUT }}
+          if-no-files-found: ignore
+      - name: Open pull request
+        if: ${{ inputs.dry_run != true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SLUG=$(jq -r .slug "$OUT/summary.json")
+          TITLE=$(jq -r .title "$OUT/summary.json")
+          BRANCH="blog/draft-$SLUG"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then BRANCH="$BRANCH-${{ github.run_number }}"; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "blog: $TITLE"
+          git push -u origin "$BRANCH"
+          BASE="${{ github.event.repository.default_branch }}"
+          # The branch is pushed either way. PR creation needs Settings → Actions → General →
+          # "Allow GitHub Actions to create and approve pull requests"; without it, leave the
+          # branch and a compare link rather than failing the run.
+          if ! gh pr create --base "$BASE" --head "$BRANCH" --title "[blog draft] $TITLE" --body-file "$OUT/pr-body.md"; then
+            echo "::warning::Could not open the PR. Draft is on branch $BRANCH — open it at ${{ github.server_url }}/${{ github.repository }}/compare/$BASE...$BRANCH"
+          fi

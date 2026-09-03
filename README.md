@@ -141,6 +141,10 @@ onspec reverse --from-json out.json  # ingest drafts an agent produced (draftsSc
 
 The LLM only drafts. Everything that must be true is enforced deterministically afterwards: criteria anchored to test names that don't actually exist are stripped and reported as test gaps, ids are assigned in sequence, and output is always `status: draft` — approval stays a human act in a reviewed PR. Validated against [unjs/defu](https://github.com/unjs/defu): 4 specs, 20 criteria, 19 anchored to existing tests, 0 hallucinated pointers admitted, and `verify` then scored the repo 19 met / 1 uncertain (a real test gap it surfaced).
 
+## Blog
+
+[onspec.sh/blog](https://onspec.sh/blog) publishes one researched post a month on spec-driven development and verifying AI-generated code. Posts are markdown in `content/posts/`, rendered to committed static HTML by `npm run build:blog`; a monthly GitHub Actions job drafts one and opens a PR. See [docs/blog.md](docs/blog.md).
+
 ## Status
 
 Weekend-scale MVP. Zero server-side state — everything derives from the repo. Roadmap: blast-radius tracing, autonomy policies (change-class → merge-gate mapping), and a verifier eval corpus.

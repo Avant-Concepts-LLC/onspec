@@ -3,4 +3,7 @@
   <url><loc>https://onspec.sh/</loc><lastmod>2026-09-02</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://onspec.sh/docs</loc><lastmod>2026-08-25</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://onspec.sh/writing-specs</loc><lastmod>2026-08-25</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <!-- blog:start -->
+  <url><loc>https://onspec.sh/blog</loc><lastmod>2026-09-03</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <!-- blog:end -->
 </urlset>
