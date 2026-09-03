@@ -130,7 +130,7 @@ const SITE = {
   voiceFile: VOICE_FILE,
   brief:
     "onspec is an open-source, git-native verification layer for spec-driven development (npm package `onspec`, GitHub Action `Avant-Concepts-LLC/onspec@v1`, MIT). Specs are markdown files with YAML frontmatter in the repo's specs/ directory; every change gets a met / unmet / uncertain verdict per acceptance criterion, anchored to test results and file evidence, with an LLM judgment only where deterministic evidence is missing; code that no approved spec governs is flagged as drift. The blog is for engineers and engineering leads adopting spec-driven development with AI coding agents.",
-  research: `Find 3-5 high-quality, primary-source articles on ONE coherent topic in: spec-driven development practice and tooling (GitHub Spec Kit, AWS Kiro, Cursor rules, Claude Code and CLAUDE.md conventions, Tessl, BMAD), reliability and evaluation of AI coding agents, verifying or testing AI-generated code, requirements traceability and acceptance criteria, CI conformance checks, or postmortems where shipped code drifted from intent. Prefer engineering blogs, official docs and announcements, arXiv, conference talks and credible practitioners. Skip listicles, vendor marketing and content farms.`,
+  research: `Find 3-5 high-quality, primary-source articles on ONE coherent topic in: spec-driven development practice and tooling (GitHub Spec Kit, AWS Kiro, Cursor rules, Claude Code and CLAUDE.md conventions, Tessl, BMAD), reliability and evaluation of AI coding agents, verifying or testing AI-generated code, requirements traceability and acceptance criteria, CI conformance checks, or postmortems where shipped code drifted from intent.\nWhere the good material lives: arXiv and conference papers, a benchmark\u0027s own paper, repo or leaderboard (SWE-bench, Terminal-Bench, Aider), official docs, changelogs and release notes, first-party engineering blogs from the labs and companies doing the work (Anthropic, OpenAI, GitHub, Google, JetBrains, Sourcegraph, Cursor), named practitioners writing under their own byline, and conference talks.\nDo NOT cite a page just because it summarizes the field. "Best AI coding agents 2026", "top 10 benchmarks" and "state of AI-generated code" pages, and vendor guides about a problem that vendor sells a product for, are content marketing: go to the paper, leaderboard or announcement they are describing and cite that instead. A benchmark score must come from the benchmark, not from a page quoting it.`,
   writing: loadVoice(VOICE_FILE),
   words: [800, 1200] as const,
   blockTypes: ["lead", "h2", "p", "list", "code", "closing"] as BlockType[],
@@ -233,6 +233,8 @@ Source discipline:
 - Append "after:${opts.cutoff}" to search queries.
 - For each candidate source, confirm its publication date from the page or the result. If you cannot confirm the date is on or after ${opts.cutoff}, DROP the source. Do not guess.
 - When a page repeats data that someone else published first, follow it back and cite the original publisher, not the summary.
+- Every source must be one of: the organization that produced the data or made the announcement, a peer-reviewed or working paper, or an established news outlet reporting it. A company's own blog counts only for that company's own news.
+- Reject content marketing on sight, however well written: SEO "guides", "state of X 2026" roundups, statistics-listicles, and posts on a vendor's blog about a problem that vendor happens to sell software for. If a page's numbers have no named, linked origin, it is not a source.
 - If fewer than 3 qualifying sources exist, narrow to a related sub-topic rather than citing stale material.
 
 EXISTING POST TITLES (do not repeat these topics):
@@ -381,6 +383,7 @@ function prBody(opts: { draft: Draft; words: number; warnings: string[]; cutoff:
   const { draft } = opts;
   const checks = [
     "Every source URL loads and says what the post claims",
+    "No source is content marketing: an SEO guide, a statistics roundup, or a vendor blog recycling someone else's numbers",
     `Source dates are on or after ${opts.cutoff} (no stale sources dressed as new)`,
     `Voice matches \`${SITE.voiceFile}\``,
     ...SITE.checklist,
