@@ -27,9 +27,11 @@ jobs:
   draft:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      OUT: ${{ runner.temp }}/blog-draft
     steps:
+      # OUT holds draft.json / summary.json / pr-body.md. It is set here rather than in a job-level
+      # `env:` block because the `runner` context is not available there.
+      - name: Set the agent's output directory
+        run: echo "OUT=$RUNNER_TEMP/blog-draft" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: npm }
