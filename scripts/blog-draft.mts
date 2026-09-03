@@ -250,7 +250,52 @@ ${SITE.writing}
 STEP 3 — Return the finished post in the required JSON shape and nothing else.`;
 }
 
-async function researchAndDraft(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; model: string }): Promise<Draft> {
+/**
+ * Pull the draft object out of the model's text.
+ *
+ * A web-search turn returns several text blocks — the running commentary between searches and
+ * then the final JSON — and the commentary can itself contain braces. Slicing from the first "{"
+ * to the last "}" therefore grabs the wrong span. Instead, scan for balanced top-level objects
+ * (string- and escape-aware) and take the last one that parses and has a draft's shape.
+ */
+function extractDraftJson(text: string): Draft {
+  const candidates: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === "{") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+      if (depth === 0 && start !== -1) {
+        candidates.push(text.slice(start, i + 1));
+        start = -1;
+      } else if (depth < 0) depth = 0;
+    }
+  }
+  for (let i = candidates.length - 1; i >= 0; i--) {
+    try {
+      const parsed = JSON.parse(candidates[i]) as Draft;
+      if (Array.isArray(parsed.blocks) && Array.isArray(parsed.sources)) return parsed;
+    } catch {
+      // Not this one — keep looking backwards.
+    }
+  }
+  throw new Error(`No draft JSON in the model output (${candidates.length} balanced object(s) in ${text.length} chars; see raw.txt)`);
+}
+
+async function researchAndDraft(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; model: string; outDir: string }): Promise<Draft> {
   const client = new Anthropic();
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: buildPrompt(opts) }];
   let message: Anthropic.Message | undefined;
@@ -274,11 +319,10 @@ async function researchAndDraft(opts: { existing: { title: string; date: string 
   const u = message.usage;
   console.error(`[blog-draft] ${opts.model}: ${u.input_tokens} in / ${u.output_tokens} out, ${u.server_tool_use?.web_search_requests ?? 0} web searches, stop=${message.stop_reason}`);
 
-  const text = message.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("");
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end <= start) throw new Error(`No JSON object in model output: ${text.slice(0, 300)}`);
-  return JSON.parse(text.slice(start, end + 1)) as Draft;
+  const text = message.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("\n");
+  // Always kept, so a parse failure is debuggable from the workflow's run artifact.
+  fs.writeFileSync(path.join(opts.outDir, "raw.txt"), text);
+  return extractDraftJson(text);
 }
 
 /** Normalize the draft in place and return what a reviewer should know. Throws only when the post is unusable. */
@@ -370,7 +414,7 @@ async function main() {
 
   const draft: Draft = args.fromDraft
     ? (JSON.parse(fs.readFileSync(args.fromDraft, "utf8")) as Draft)
-    : await researchAndDraft({ existing, today, cutoff, lookbackDays, model });
+    : await researchAndDraft({ existing, today, cutoff, lookbackDays, model, outDir });
   if (existing.some((p) => p.title.toLowerCase() === draft.title.toLowerCase())) throw new Error(`Draft duplicates an existing title: ${draft.title}`);
   const { words, warnings } = validateDraft(draft, cutoff);
   fs.writeFileSync(path.join(outDir, "draft.json"), JSON.stringify(draft, null, 2));
