@@ -313,8 +313,16 @@ function extractDraftJson(text: string): Draft {
 
 async function researchAndDraft(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; model: string; outDir: string }): Promise<Draft> {
   const client = new Anthropic({ timeout: REQUEST_TIMEOUT_MS, maxRetries: 1 });
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content: buildPrompt(opts) }];
+  // The instruction prefix carries an explicit cache breakpoint. Server-side web search runs its own
+  // sampling loop, re-reading the whole accumulated context on every internal turn, and it appends its
+  // own 5-minute cache write after each tool result — but only when the request already uses caching.
+  // Marking the prefix is what turns those re-reads into cache reads at 0.1x instead of full input price.
+  // Sonnet 5 needs a 1024-token prefix to cache at all; this prompt runs ~2.7k, so it qualifies.
+  const messages: Anthropic.MessageParam[] = [
+    { role: "user", content: [{ type: "text", text: buildPrompt(opts), cache_control: { type: "ephemeral" } }] },
+  ];
   let message: Anthropic.Message | undefined;
+  const usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, searches: 0 };
   const startedAt = Date.now();
   // Server-side web search runs its own sampling loop; a long research turn can come back as
   // pause_turn. Re-send the conversation as-is and the server resumes where it left off.
@@ -328,17 +336,27 @@ async function researchAndDraft(opts: { existing: { title: string; date: string 
       max_tokens: 32000,
       tools: [{ type: "web_search_20260209", name: "web_search", max_uses: MAX_SEARCHES }],
       output_config: { format: { type: "json_schema", schema: DRAFT_SCHEMA } },
+      // Automatic caching moves a second breakpoint onto the growing tail as pause_turn turns
+      // accumulate; the explicit marker above keeps the prefix readable no matter how long that gets.
+      cache_control: { type: "ephemeral" },
       messages,
     });
     message = await stream.finalMessage();
+    const t = message.usage;
+    usage.input += t.input_tokens; usage.output += t.output_tokens;
+    usage.cacheRead += t.cache_read_input_tokens ?? 0; usage.cacheWrite += t.cache_creation_input_tokens ?? 0;
+    usage.searches += t.server_tool_use?.web_search_requests ?? 0;
     if (message.stop_reason !== "pause_turn") break;
     messages.push({ role: "assistant", content: message.content as unknown as Anthropic.ContentBlockParam[] });
   }
   if (!message) throw new Error("No response from the model");
   if (message.stop_reason === "refusal") throw new Error(`Model refused: ${message.stop_details?.explanation ?? "(no explanation)"}`);
   if (message.stop_reason === "max_tokens") throw new Error("Model output was truncated at max_tokens");
-  const u = message.usage;
-  console.error(`[blog-draft] ${opts.model}: ${u.input_tokens} in / ${u.output_tokens} out, ${u.server_tool_use?.web_search_requests ?? 0} web searches, stop=${message.stop_reason}`);
+  // Totals across every pause_turn turn, not just the last one. cached% is the caching regression
+  // alarm: it ran ~90% on the runs this was built against, and a drop to 0 means the prefix moved.
+  const billed = usage.input + usage.cacheRead + usage.cacheWrite;
+  const cachedPct = billed ? Math.round((usage.cacheRead / billed) * 100) : 0;
+  console.error(`[blog-draft] ${opts.model}: ${billed} in (${cachedPct}% cached, ${usage.cacheWrite} written) / ${usage.output} out, ${usage.searches} web searches, stop=${message.stop_reason}`);
 
   const text = message.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("\n");
   // Always kept, so a parse failure is debuggable from the workflow's run artifact.
