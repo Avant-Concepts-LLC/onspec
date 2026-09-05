@@ -1,0 +1,9 @@
+{
+  "brand": "onspec",
+  "signature": "",
+  "channels": {
+    "linkedin": { "integrationId": "TODO-run-list-channels", "provider": "linkedin-page", "note": "onspec company page" },
+    "x":        { "integrationId": "TODO-run-list-channels", "provider": "x", "settings": { "who_can_reply_post": "everyone" } },
+    "bluesky":  { "integrationId": "TODO-run-list-channels", "provider": "bluesky" }
+  }
+}
