@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WPP2D90B4G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WPP2D90B4G');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spec Conformance Is the Metric Benchmarks Skip — onspec</title>
+<meta name="description" content="AI coding benchmarks hit new highs in 2026, but review debt and requirement drift show why passing tests isn't the same as meeting a spec.">
+<link rel="canonical" href="https://onspec.sh/blog/spec-conformance-beats-benchmark-scores">
+<meta property="og:title" content="Spec Conformance Is the Metric Benchmarks Skip — onspec">
+<meta property="og:description" content="AI coding benchmarks hit new highs in 2026, but review debt and requirement drift show why passing tests isn't the same as meeting a spec.">
+<meta property="og:url" content="https://onspec.sh/blog/spec-conformance-beats-benchmark-scores">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Spec Conformance Is the Metric Benchmarks Skip","description":"AI coding benchmarks hit new highs in 2026, but review debt and requirement drift show why passing tests isn't the same as meeting a spec.","datePublished":"2026-09-05","url":"https://onspec.sh/blog/spec-conformance-beats-benchmark-scores","mainEntityOfPage":"https://onspec.sh/blog/spec-conformance-beats-benchmark-scores","isPartOf":{"@id":"https://onspec.sh/blog"},"keywords":"ai-coding-agents, benchmarks, spec-driven-development, verification","author":{"@type":"Organization","name":"Avant Concepts","url":"https://avant-concepts.com"},"publisher":{"@type":"Organization","name":"onspec","url":"https://onspec.sh"},"citation":[{"@type":"CreativeWork","name":"Best AI Coding Agents (August 2026): The Scored Leaderboard, Updated After GPT-5.6 and Opus 5","url":"https://www.morphllm.com/best-ai-coding-agents-2026"},{"@type":"CreativeWork","name":"Top 10 Open-Source Benchmarks for AI Coding Agents in 2026","url":"https://www.kdnuggets.com/top-10-open-source-benchmarks-for-ai-coding-agents-in-2026"},{"@type":"CreativeWork","name":"Reviewing AI-Generated Code: A Verification Discipline for the Loop","url":"https://www.augmentcode.com/guides/reviewing-ai-generated-code"},{"@type":"CreativeWork","name":"State of AI-Generated Code 2026: The QA and Testing Gap","url":"https://www.deviqa.com/blog/state-of-ai-generated-code-2026-the-qa-and-testing-gap/"},{"@type":"CreativeWork","name":"What Is Spec-Driven Development? A Complete Guide","url":"https://www.augmentcode.com/guides/what-is-spec-driven-development"}]}</script>
+<style>
+  :root {
+    --bg: #0b0d10; --bg-raised: #11141a; --bg-panel: #0e1116; --line: #1e232c; --line-soft: #171b22;
+    --text: #e8ebef; --text-dim: #9aa3b0; --text-faint: #616a78; --accent: #3ecf8e; --accent-dim: #2a8f64;
+    --radius: 10px; --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--text); font-family: "Geist", -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  nav.top { position: sticky; top: 0; z-index: 40; height: 64px; border-bottom: 1px solid var(--line-soft); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm { color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 14px; transition: border-color .2s, background .2s; }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  article { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .eyebrow { font-family: "Geist Mono", monospace; font-size: 13px; color: var(--text-faint); }
+  h1 { font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.03em; font-weight: 700; margin-top: 10px; }
+  .lede { margin-top: 12px; color: var(--text-dim); font-size: 1.1rem; }
+  .meta { margin-top: 16px; font-size: 13.5px; color: var(--text-faint); display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--text-dim); }
+  .body { margin-top: 40px; }
+  .body h2 { font-size: 1.35rem; letter-spacing: -0.02em; font-weight: 700; margin-top: 48px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+  .body h3 { font-size: 1.05rem; font-weight: 600; margin-top: 30px; }
+  .body p { margin-top: 14px; color: var(--text-dim); }
+  .body p:first-child { color: var(--text); font-size: 1.08rem; }
+  .body strong { color: var(--text); }
+  .body ul, .body ol { margin: 12px 0 0 20px; color: var(--text-dim); }
+  .body li { margin-top: 6px; }
+  .body blockquote { margin-top: 20px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--text); font-size: 1.1rem; }
+  .body code { background: var(--bg-raised); border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text); }
+  .body pre { margin-top: 16px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; font-size: 12.8px; line-height: 1.7; overflow-x: auto; color: var(--text-dim); }
+  .body pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+  .body a { color: var(--accent); }
+  .sources { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+  .sources h2 { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); }
+  .sources ol { margin: 12px 0 0 0; list-style: none; font-size: 14px; }
+  .sources li { margin-top: 8px; color: var(--text-dim); }
+  .sources .n { color: var(--text-faint); margin-right: 8px; font-family: "Geist Mono", monospace; }
+  .sources a { color: var(--text); }
+  .sources a:hover { color: var(--accent); }
+  .cta { margin-top: 48px; padding: 20px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-raised); color: var(--text-dim); font-size: 15px; }
+  .cta a { color: var(--accent); }
+  .list { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .list h1 { margin-top: 10px; }
+  .post { display: block; padding: 22px 0; border-bottom: 1px solid var(--line-soft); }
+  .post:hover .post-title { color: var(--accent); }
+  .post-title { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; transition: color .15s; }
+  .post-desc { margin-top: 6px; color: var(--text-dim); }
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-faint); }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ blog</span></a>
+    <div class="nav-links">
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <p class="eyebrow">blog / spec-conformance-beats-benchmark-scores</p>
+  <h1>Spec Conformance Is the Metric Benchmarks Skip</h1>
+  <p class="lede">SWE-bench scores keep climbing while review debt, security regressions, and requirement drift keep piling up in production. The missing check isn't a better benchmark, it's conformance to the spec a team actually wrote.</p>
+  <div class="meta"><time datetime="2026-09-05">Sep 5, 2026</time><span>·</span><span>4 min read</span><span class="tag">ai-coding-agents</span><span class="tag">benchmarks</span><span class="tag">spec-driven-development</span><span class="tag">verification</span></div>
+  <div class="body">
+<p>SWE-bench Verified is the number every vendor leads with, and by August 2026 the frontier model on that leaderboard was clearing it at 95.0 percent, with SWE-bench Pro at 80.3 percent [1]. That number says an agent can produce a patch that makes a test suite pass on a curated set of GitHub issues. It says nothing about whether the code an agent just wrote in your repo matches what your team meant when it filed the ticket, and that gap is where most AI-generated code actually fails.</p>
+<h2>The benchmark treadmill</h2>
+<p>Benchmarks for coding agents have multiplied past SWE-bench precisely because pass or fail against a fixed test suite misses real failure modes. A recent survey of ten open-source benchmarks lists Terminal-Bench for shell fluency and Senior SWE-Bench for maintainability and design judgment, among several others built to catch what the original SWE-bench cannot see [2]. Each new benchmark is an admission that the previous one measured something narrower than correct code.</p>
+<p>None of them measure conformance to a specific project&#39;s stated intent, because none of them have access to it. SWE-bench grades against the fix that was eventually merged for a real issue. Senior SWE-Bench grades against senior-engineer judgment calls. Both are proxies for the acceptance criteria a team would have written down if it had a spec in the first place [2].</p>
+<h2>What a passing score hides</h2>
+<p>Teams running agents at scale are seeing the proxy gap show up as review debt. One verification guide&#39;s synthesis of 2026 industry data found that under high AI adoption, median pull request review time rose five times and incidents per pull request tripled, while PR size grew 51 percent [3]. The same guide cites a 2,500-review, 3.2-million-line study showing human defect detection collapses past 400 lines, close to the size of an average AI-authored PR now under review [3].</p>
+<p>Model quality has not closed the gap. Syntax pass rates have climbed toward 95 percent across recent model generations, but security pass rates have stayed flat at 45 to 55 percent, and one cited study puts average package hallucination at 19.6 percent across sixteen models [3]. Newer models write code that looks more finished. They are not, by these numbers, writing code that is more correct.</p>
+<p>DeviQA&#39;s 2026 survey of QA teams describes the same blind spot from the other direction. AI-assisted code is now the default assumption on the QA floor, and low security-defect counts get read as proof the code is safe when they are really proof that QA is doing exactly the job it was configured to do [4]. Requirement fidelity, whether the implementation does what the ticket asked and not just what its own tests check, is the failure mode neither the benchmark nor the QA pipeline is built to catch, because the agent that wrote the code often wrote the tests too [4].</p>
+<h2>Specs turn looks right into is right</h2>
+<p>This is the argument for treating a specification as an executable contract instead of documentation that trails the code. One spec-driven development guide published in late August frames the shift directly: traditional specs are read by humans, spec-driven specs execute as validation gates, and the build fails when the code diverges from what is written [5]. That is a categorically different check than the tests pass. A test suite verifies whatever the agent decided to test. A spec conformance check verifies whether the criteria a human actually wrote down were met.</p>
+<p>The regulatory timeline is making this less optional. The EU AI Act Omnibus entered into force on July 27, 2026 and pushed back high-risk compliance deadlines, with standalone high-risk systems coming into scope on December 2, 2027 and AI embedded in regulated products by August 2, 2028, and fines up to fifteen million euros or three percent of global turnover for breaches [5]. Once a spec can be pointed to as compliance evidence, a green CI pipeline stops being an adequate answer to how a team knows its system does what it is supposed to do.</p>
+<h2>What a spec check does that a benchmark can&#39;t</h2>
+<ul>
+<li>A verdict per acceptance criterion, met, unmet, or uncertain, instead of one aggregate green checkmark</li>
+<li>Code with no governing spec flagged as drift, not silently merged as passing</li>
+<li>Deterministic evidence first, test results and file diffs, with LLM judgment used only where that evidence is missing</li>
+<li>Run on every pull request in CI, not benchmarked once per model release</li>
+</ul>
+<pre><code class="language-yaml">acceptance_criteria:
+  - id: AC-3
+    text: &quot;Refund endpoint rejects orders older than 90 days&quot;
+    verdict: unmet
+    evidence:
+      test: &quot;tests/refunds_test.py::test_stale_order_rejected — FAILED&quot;
+      file: &quot;src/refunds.py:42 — no date check present&quot;
+  - id: AC-4
+    text: &quot;Refund endpoint logs a reason code on rejection&quot;
+    verdict: uncertain
+    evidence:
+      note: &quot;no deterministic test covers this; judged against src/refunds.py:58&quot;
+drift:
+  - file: &quot;src/refunds_export.py&quot;
+    reason: &quot;no approved spec in specs/ governs this file&quot;
+</code></pre>
+<p>onspec doesn&#39;t write the spec and it isn&#39;t a test runner. It reads whatever acceptance criteria a team already committed to specs/, anchors each one to test results and file evidence, falls back to an LLM judgment only where deterministic evidence is missing, and flags the code no approved spec covers. It closes the gap between the benchmark passed and the spec was met, nothing more.</p>
+
+  </div>
+  <section class="sources" aria-label="Sources"><h2>Sources</h2><ol><li id="src-1"><span class="n">[1]</span><a href="https://www.morphllm.com/best-ai-coding-agents-2026" rel="noopener nofollow" target="_blank">Best AI Coding Agents (August 2026): The Scored Leaderboard, Updated After GPT-5.6 and Opus 5</a> <span>— morphllm.com, Sat Aug 01 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li><li id="src-2"><span class="n">[2]</span><a href="https://www.kdnuggets.com/top-10-open-source-benchmarks-for-ai-coding-agents-in-2026" rel="noopener nofollow" target="_blank">Top 10 Open-Source Benchmarks for AI Coding Agents in 2026</a> <span>— KDnuggets, Wed Aug 19 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li><li id="src-3"><span class="n">[3]</span><a href="https://www.augmentcode.com/guides/reviewing-ai-generated-code" rel="noopener nofollow" target="_blank">Reviewing AI-Generated Code: A Verification Discipline for the Loop</a> <span>— Augment Code, Fri Jul 24 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li><li id="src-4"><span class="n">[4]</span><a href="https://www.deviqa.com/blog/state-of-ai-generated-code-2026-the-qa-and-testing-gap/" rel="noopener nofollow" target="_blank">State of AI-Generated Code 2026: The QA and Testing Gap</a> <span>— DeviQA, Wed Jul 22 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li><li id="src-5"><span class="n">[5]</span><a href="https://www.augmentcode.com/guides/what-is-spec-driven-development" rel="noopener nofollow" target="_blank">What Is Spec-Driven Development? A Complete Guide</a> <span>— Augment Code, Sun Aug 30 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li></ol></section>
+  <div class="cta">Specs that refuse to drift: <a href="/docs">read the docs</a>, or <code>npm install -g onspec</code> and run <code>onspec lint</code> on a spec you already have.</div>
+</article>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">© 2026 <a href="https://avant-concepts.com" style="color: inherit">Avant Concepts LLC</a></span>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a href="https://www.npmjs.com/package/onspec">npm</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

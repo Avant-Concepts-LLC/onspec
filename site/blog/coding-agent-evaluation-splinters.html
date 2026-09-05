@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WPP2D90B4G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WPP2D90B4G');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coding Agent Evaluation Is Splintering Into Smaller Checks — onspec</title>
+<meta name="description" content="Recent benchmark churn, open eval releases, and vendor guardrails show coding-agent trust is moving from one score to many small, evidence-anchored checks.">
+<link rel="canonical" href="https://onspec.sh/blog/coding-agent-evaluation-splinters">
+<meta property="og:title" content="Coding Agent Evaluation Is Splintering Into Smaller Checks — onspec">
+<meta property="og:description" content="Recent benchmark churn, open eval releases, and vendor guardrails show coding-agent trust is moving from one score to many small, evidence-anchored checks.">
+<meta property="og:url" content="https://onspec.sh/blog/coding-agent-evaluation-splinters">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Coding Agent Evaluation Is Splintering Into Smaller Checks","description":"Recent benchmark churn, open eval releases, and vendor guardrails show coding-agent trust is moving from one score to many small, evidence-anchored checks.","datePublished":"2026-09-05","url":"https://onspec.sh/blog/coding-agent-evaluation-splinters","mainEntityOfPage":"https://onspec.sh/blog/coding-agent-evaluation-splinters","isPartOf":{"@id":"https://onspec.sh/blog"},"keywords":"ai-coding-agents, benchmarks, verification, spec-driven-development","author":{"@type":"Organization","name":"Avant Concepts","url":"https://avant-concepts.com"},"publisher":{"@type":"Organization","name":"onspec","url":"https://onspec.sh"},"citation":[{"@type":"CreativeWork","name":"Terminal-Bench 4.0","url":"https://snorkel.ai/leaderboard/terminal-bench-4-0/"},{"@type":"CreativeWork","name":"SWE-bench","url":"https://github.com/SWE-bench/SWE-bench"},{"@type":"CreativeWork","name":"Claude Code changelog","url":"https://code.claude.com/docs/en/changelog"},{"@type":"CreativeWork","name":"GitHub now sees 2.9 billion commits a month — and it can't keep up","url":"https://thenewstack.io/github-2-9b-monthly-commits/"}]}</script>
+<style>
+  :root {
+    --bg: #0b0d10; --bg-raised: #11141a; --bg-panel: #0e1116; --line: #1e232c; --line-soft: #171b22;
+    --text: #e8ebef; --text-dim: #9aa3b0; --text-faint: #616a78; --accent: #3ecf8e; --accent-dim: #2a8f64;
+    --radius: 10px; --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--text); font-family: "Geist", -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  nav.top { position: sticky; top: 0; z-index: 40; height: 64px; border-bottom: 1px solid var(--line-soft); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm { color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 14px; transition: border-color .2s, background .2s; }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  article { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .eyebrow { font-family: "Geist Mono", monospace; font-size: 13px; color: var(--text-faint); }
+  h1 { font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.03em; font-weight: 700; margin-top: 10px; }
+  .lede { margin-top: 12px; color: var(--text-dim); font-size: 1.1rem; }
+  .meta { margin-top: 16px; font-size: 13.5px; color: var(--text-faint); display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--text-dim); }
+  .body { margin-top: 40px; }
+  .body h2 { font-size: 1.35rem; letter-spacing: -0.02em; font-weight: 700; margin-top: 48px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+  .body h3 { font-size: 1.05rem; font-weight: 600; margin-top: 30px; }
+  .body p { margin-top: 14px; color: var(--text-dim); }
+  .body p:first-child { color: var(--text); font-size: 1.08rem; }
+  .body strong { color: var(--text); }
+  .body ul, .body ol { margin: 12px 0 0 20px; color: var(--text-dim); }
+  .body li { margin-top: 6px; }
+  .body blockquote { margin-top: 20px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--text); font-size: 1.1rem; }
+  .body code { background: var(--bg-raised); border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text); }
+  .body pre { margin-top: 16px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; font-size: 12.8px; line-height: 1.7; overflow-x: auto; color: var(--text-dim); }
+  .body pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+  .body a { color: var(--accent); }
+  .sources { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+  .sources h2 { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); }
+  .sources ol { margin: 12px 0 0 0; list-style: none; font-size: 14px; }
+  .sources li { margin-top: 8px; color: var(--text-dim); }
+  .sources .n { color: var(--text-faint); margin-right: 8px; font-family: "Geist Mono", monospace; }
+  .sources a { color: var(--text); }
+  .sources a:hover { color: var(--accent); }
+  .cta { margin-top: 48px; padding: 20px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-raised); color: var(--text-dim); font-size: 15px; }
+  .cta a { color: var(--accent); }
+  .list { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .list h1 { margin-top: 10px; }
+  .post { display: block; padding: 22px 0; border-bottom: 1px solid var(--line-soft); }
+  .post:hover .post-title { color: var(--accent); }
+  .post-title { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; transition: color .15s; }
+  .post-desc { margin-top: 6px; color: var(--text-dim); }
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-faint); }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ blog</span></a>
+    <div class="nav-links">
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <p class="eyebrow">blog / coding-agent-evaluation-splinters</p>
+  <h1>Coding Agent Evaluation Is Splintering Into Smaller Checks</h1>
+  <p class="lede">Benchmarks that used to produce one trusted percentage are now versioned, opened up, and stacked against product-level guardrails. The common thread is that nobody believes a single number anymore.</p>
+  <div class="meta"><time datetime="2026-09-05">Sep 5, 2026</time><span>·</span><span>4 min read</span><span class="tag">ai-coding-agents</span><span class="tag">benchmarks</span><span class="tag">verification</span><span class="tag">spec-driven-development</span></div>
+  <div class="body">
+<p>Four things happened in the last six weeks that look unrelated on their own: a benchmark leaderboard reset for the fourth time, a widely cited eval opened its full task set for local runs instead of asking for trust, a coding assistant&#39;s changelog added another narrow permission toggle, and a platform&#39;s own outage postmortem disclosed just how much of its traffic is now AI-generated. None of them is a story about one better number. All four are the same story: the industry stopped trying to compress &quot;is this agent&#39;s output good&quot; into a single trusted score, and started stacking narrower, evidence-anchored checks instead.</p>
+<h2>A leaderboard with a two-month half-life</h2>
+<p>Terminal-Bench is on its fourth major revision in roughly a year of public use, and the current leader, Claude Code running Fable 5.1, resolves 57.9% of tasks on Terminal-Bench 4.0 at maximum effort [1]. That number will mean very little by the time a reader six months from now looks it up, because the benchmark itself keeps changing the tasks. Each revision exists because agents caught up to the previous one fast enough that the score stopped separating real capability from memorized shape. A percentage that has to be replaced every few months isn&#39;t a scoreboard, it&#39;s a snapshot, and treating it as anything more durable than that is where a lot of vendor marketing goes wrong.</p>
+<p>This isn&#39;t a flaw unique to Terminal-Bench. It&#39;s what happens to any single aggregate score once enough optimization pressure is pointed at it. The honest response, and the one actually happening, is not to chase a more perfect single number. It&#39;s to keep the eval moving and keep publishing the task-level detail underneath the headline percentage, so a score can be checked rather than just cited.</p>
+<h2>Handing over the eval instead of asking for trust</h2>
+<p>SWE-bench took the more direct version of that step. On September 1, 2026, the project&#39;s own repository announced that SWE-bench Multimodal v2 is fully open source, with all 480 tasks available for local evaluation [2]. That&#39;s a small-sounding change with a specific purpose: instead of publishing a leaderboard number and asking you to believe the harness behind it was run fairly, the project hands you the tasks and lets you run them against your own setup, your own model, your own scaffolding. The evidence moves from a claim to something you can reproduce.</p>
+<p>That&#39;s the same move a spec-anchored acceptance criterion makes over a plain checkbox in a ticket. &quot;Resolves 73% of issues&quot; is a claim. &quot;Here are the 480 tasks, run them yourself&quot; is evidence. The difference matters more as agent-written code volume grows, because claims don&#39;t scale with scrutiny and evidence does.</p>
+<h2>Guardrails accumulate instead of consolidating</h2>
+<p>The same pattern shows up one layer down, at the tool that actually runs an agent&#39;s commands. Anthropic&#39;s Claude Code changelog for July 20, 2026 added a sandbox.filesystem.disabled setting that lets a team skip filesystem isolation while keeping network egress control, and changed EnterWorktree so it now asks for confirmation before entering a git worktree outside the project&#39;s own .claude/worktrees/ directory [3]. Neither change is a headline feature. Both are narrow, specific permission points added to a list that keeps growing release over release.</p>
+<p>There is no single setting in that changelog that says &quot;trust this agent&quot; and turns green. There&#39;s a sandbox flag for filesystem access, a separate one for network egress, a confirmation step for leaving the expected working directory, and dozens more accumulated over prior releases. The product-level answer to &quot;can I trust what the agent just did&quot; is the same answer the benchmark world landed on: not one gate, many small ones, each anchored to a specific, checkable action.</p>
+<pre><code class="language-json">// .claude/settings.json — narrow, composable permission points,
+// not one &quot;trust the agent&quot; toggle
+{
+  &quot;sandbox&quot;: {
+    &quot;filesystem&quot;: { &quot;disabled&quot;: false },
+    &quot;network&quot;: { &quot;egress&quot;: &quot;deny-by-default&quot; }
+  },
+  &quot;worktree&quot;: {
+    &quot;confirmOutsideProjectDir&quot;: true
+  }
+}
+</code></pre>
+<h2>The volume problem no score was built for</h2>
+<p>The reason this matters beyond benchmark trivia showed up in GitHub&#39;s own account of its August 17, 2026 outage. Reporting on GitHub&#39;s postmortem put a number on what &quot;more AI-generated code&quot; actually means at platform scale: roughly 2.9 billion commits a month, with AI-driven growth cited as a direct contributor to the infrastructure strain behind the eight-hour outage [4]. A client-side retry loop then made the recovery worse, but the underlying pressure was volume, and the volume is substantially agent-driven.</p>
+<p>At that scale, no leaderboard percentage and no amount of human diff review is the thing standing between an agent&#39;s output and what actually ships. Whatever checks a change against intent has to run automatically, on every change, anchored to something concrete, because periodic sampling and spot checks were never built for billions of commits a month. That&#39;s the same pressure pushing benchmarks toward reproducible task sets and coding tools toward narrower permission points: aggregate trust doesn&#39;t scale, so the industry is replacing it with more numerous, smaller, checkable ones.</p>
+<ul>
+<li>Terminal-Bench reset its task set for the fourth time as agents saturated the previous version within months, not years.</li>
+<li>SWE-bench opened its full 480-task Multimodal v2 set for local evaluation instead of asking teams to trust a reported score.</li>
+<li>Claude Code&#39;s changelog kept adding narrow sandbox and confirmation settings rather than one consolidated trust flag.</li>
+<li>GitHub&#39;s own outage postmortem quantified how much of its 2.9 billion monthly commits AI-driven growth now accounts for.</li>
+</ul>
+<p>onspec sits at the same layer as that last shift: it checks whether code conforms to the specs a team has already approved, criterion by criterion, anchored to test results and file evidence rather than a single pass or fail. It won&#39;t write the spec for you, and it isn&#39;t a test runner — it&#39;s the check that runs after the tests do, on every change, because at agent-driven volume nobody has time to spot-check.</p>
+
+  </div>
+  <section class="sources" aria-label="Sources"><h2>Sources</h2><ol><li id="src-1"><span class="n">[1]</span><a href="https://snorkel.ai/leaderboard/terminal-bench-4-0/" rel="noopener nofollow" target="_blank">Terminal-Bench 4.0</a> <span>— Snorkel AI (Terminal-Bench leaderboard), Mon Aug 31 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li><li id="src-2"><span class="n">[2]</span><a href="https://github.com/SWE-bench/SWE-bench" rel="noopener nofollow" target="_blank">SWE-bench</a> <span>— GitHub (SWE-bench project), Mon Aug 31 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li><li id="src-3"><span class="n">[3]</span><a href="https://code.claude.com/docs/en/changelog" rel="noopener nofollow" target="_blank">Claude Code changelog</a> <span>— Anthropic (Claude Code Docs), Sun Jul 19 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li><li id="src-4"><span class="n">[4]</span><a href="https://thenewstack.io/github-2-9b-monthly-commits/" rel="noopener nofollow" target="_blank">GitHub now sees 2.9 billion commits a month — and it can't keep up</a> <span>— The New Stack, Thu Aug 20 2026 20:00:00 GMT-0400 (Eastern Daylight Time)</span></li></ol></section>
+  <div class="cta">Specs that refuse to drift: <a href="/docs">read the docs</a>, or <code>npm install -g onspec</code> and run <code>onspec lint</code> on a spec you already have.</div>
+</article>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">© 2026 <a href="https://avant-concepts.com" style="color: inherit">Avant Concepts LLC</a></span>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a href="https://www.npmjs.com/package/onspec">npm</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
