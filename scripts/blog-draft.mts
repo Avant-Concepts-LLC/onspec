@@ -11,6 +11,7 @@
  * Run locally:
  *   npx tsx scripts/blog-draft.mts --dry-run             research + draft, write nothing, print the draft
  *   npx tsx scripts/blog-draft.mts --lookback 60         widen the source-recency window (days)
+ *   npx tsx scripts/blog-draft.mts --demand brief.md     read a reader-demand brief (default: $BLOG_OUT_DIR/search-brief.md if present)
  *   npx tsx scripts/blog-draft.mts --from-draft d.json   skip research; run the adapter on a saved draft
  *
  * Env: ANTHROPIC_API_KEY (required unless --from-draft), BLOG_MODEL (default claude-sonnet-5),
@@ -216,12 +217,13 @@ function writePost(draft: Draft, today: string, words: number): string[] {
 // ───────────────────────────── Shared: pipeline ─────────────────────────────
 
 function parseArgs(argv: string[]) {
-  const out = { dryRun: false, lookback: 0, fromDraft: "" };
+  const out = { dryRun: false, lookback: 0, fromDraft: "", demand: "" };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--dry-run") out.dryRun = true;
     else if (a === "--lookback") out.lookback = parseInt(argv[++i] ?? "", 10);
     else if (a === "--from-draft") out.fromDraft = argv[++i] ?? "";
+    else if (a === "--demand") out.demand = argv[++i] ?? "";
     else throw new Error(`Unknown argument: ${a}`);
   }
   return out;
@@ -233,7 +235,7 @@ const countWords = (s: string) => s.split(/\s+/).filter(Boolean).length;
 const allText = (d: Draft) => d.blocks.map((b) => (b.type === "list" ? b.items.join(" ") : b.type === "code" ? "" : b.text)).join(" ");
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").split("-").slice(0, 6).join("-");
 
-function buildPrompt(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number }) {
+function buildPrompt(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; demand: string }) {
   const allows = (t: BlockType) => SITE.blockTypes.includes(t);
   return `You are the research and drafting agent for the ${SITE.name} blog (${SITE.url}${SITE.blogPath}). ${SITE.brief}
 
@@ -253,7 +255,11 @@ Source discipline:
 
 EXISTING POST TITLES (do not repeat these topics):
 ${opts.existing.length ? opts.existing.map((p) => `- ${p.title} (${p.date})`).join("\n") : "(none yet)"}
-
+${opts.demand ? `
+READER DEMAND — the last 28 days of Search Console and GA4 for this site (a signal for choosing the topic, not a mandate):
+${opts.demand}
+How to use it: prefer a topic that answers a non-brand query readers already type where no page of ours ranks in the top 10, or one that deepens a page that holds readers but is not found through search. A query is a hint about the question, not a title to copy. The publication cutoff and source discipline above still rule: if no fresh, citable material exists for the demand-led topic, pick another.
+` : ""}
 STEP 2 — WRITE the post, synthesizing across ALL sources (never a source-by-source summary):
 ${SITE.writing}
 - ${SITE.words[0]}-${SITE.words[1]} words across the blocks.
@@ -311,7 +317,7 @@ function extractDraftJson(text: string): Draft {
   throw new Error(`No draft JSON in the model output (${candidates.length} balanced object(s) in ${text.length} chars; see raw.txt)`);
 }
 
-async function researchAndDraft(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; model: string; outDir: string }): Promise<Draft> {
+async function researchAndDraft(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; demand: string; model: string; outDir: string }): Promise<Draft> {
   const client = new Anthropic({ timeout: REQUEST_TIMEOUT_MS, maxRetries: 1 });
   // The instruction prefix carries an explicit cache breakpoint. Server-side web search runs its own
   // sampling loop, re-reading the whole accumulated context on every internal turn, and it appends its
@@ -423,7 +429,7 @@ function validateDraft(draft: Draft, cutoff: string): { words: number; warnings:
   return { words, warnings };
 }
 
-function prBody(opts: { draft: Draft; words: number; warnings: string[]; cutoff: string; lookbackDays: number; model: string }) {
+function prBody(opts: { draft: Draft; words: number; warnings: string[]; cutoff: string; lookbackDays: number; model: string; demand: string }) {
   const { draft } = opts;
   const checks = [
     "Every source URL loads and says what the post claims",
@@ -431,6 +437,7 @@ function prBody(opts: { draft: Draft; words: number; warnings: string[]; cutoff:
     `Source dates are on or after ${opts.cutoff} (no stale sources dressed as new)`,
     `Voice matches \`${SITE.voiceFile}\``,
     ...SITE.checklist,
+    ...(opts.demand ? ["Topic answers something in the reader-demand brief below, or the brief had nothing usable and the agent said why"] : []),
     "Title, meta description and slug are sharp",
     `Preview deploy renders ${SITE.url}${SITE.blogPath}/${draft.slug}`,
   ];
@@ -441,7 +448,8 @@ function prBody(opts: { draft: Draft; words: number; warnings: string[]; cutoff:
     ...checks.map((c) => `- [ ] ${c}`),
     ...(opts.warnings.length ? ["", "**Agent warnings**", ...opts.warnings.map((w) => `- Warning: ${w}`)] : []),
     "",
-    `Slug \`${draft.slug}\` · ${opts.words} words · ${draft.sources.length} sources · ${opts.model} · lookback ${opts.lookbackDays}d`,
+    `Slug \`${draft.slug}\` · ${opts.words} words · ${draft.sources.length} sources · ${opts.model} · lookback ${opts.lookbackDays}d · demand brief ${opts.demand ? "used" : "none"}`,
+    ...(opts.demand ? ["", "<details><summary>Reader-demand brief the agent saw (scripts/search-brief.mts)</summary>", "", "```", opts.demand, "```", "", "</details>"] : []),
     "",
   ].join("\n");
 }
@@ -462,18 +470,24 @@ async function main() {
   const today = isoDay(now);
   const cutoff = isoDay(new Date(now.getTime() - lookbackDays * 86400000));
   const existing = existingPosts();
+  // Reader demand: a 28-day Search Console + GA4 brief written by scripts/search-brief.mts. Optional —
+  // the workflow only produces it when the GOOGLE_ADC_JSON secret is set, and a local run without one
+  // drafts exactly as before.
+  const demandFile = args.demand || process.env.BLOG_DEMAND_FILE || path.join(outDir, "search-brief.md");
+  const demand = fs.existsSync(demandFile) ? fs.readFileSync(demandFile, "utf8").trim() : "";
+  if (demand) console.error(`[blog-draft] reader-demand brief: ${demandFile}`);
 
   const draft: Draft = args.fromDraft
     ? (JSON.parse(fs.readFileSync(args.fromDraft, "utf8")) as Draft)
-    : await researchAndDraft({ existing, today, cutoff, lookbackDays, model, outDir });
+    : await researchAndDraft({ existing, today, cutoff, lookbackDays, demand, model, outDir });
   if (existing.some((p) => p.title.toLowerCase() === draft.title.toLowerCase())) throw new Error(`Draft duplicates an existing title: ${draft.title}`);
   const { words, warnings } = validateDraft(draft, cutoff);
   fs.writeFileSync(path.join(outDir, "draft.json"), JSON.stringify(draft, null, 2));
 
   const files = dryRun ? [] : writePost(draft, today, words);
-  const summary = { slug: draft.slug, title: draft.title, words, sources: draft.sources.length, files, dryRun, warnings, model, lookbackDays, cutoff };
+  const summary = { slug: draft.slug, title: draft.title, words, sources: draft.sources.length, files, dryRun, warnings, model, lookbackDays, cutoff, demandBrief: Boolean(demand) };
   fs.writeFileSync(path.join(outDir, "summary.json"), JSON.stringify(summary, null, 2));
-  fs.writeFileSync(path.join(outDir, "pr-body.md"), prBody({ draft, words, warnings, cutoff, lookbackDays, model }));
+  fs.writeFileSync(path.join(outDir, "pr-body.md"), prBody({ draft, words, warnings, cutoff, lookbackDays, model, demand }));
 
   console.error(`[blog-draft] ${dryRun ? "DRY RUN — " : ""}"${draft.title}" (${draft.slug}) · ${words} words · ${draft.sources.length} sources`);
   for (const w of warnings) console.error(`[blog-draft] warning: ${w}`);

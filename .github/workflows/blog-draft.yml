@@ -31,11 +31,28 @@ jobs:
       # OUT holds draft.json / summary.json / pr-body.md. It is set here rather than in a job-level
       # `env:` block because the `runner` context is not available there.
       - name: Set the agent's output directory
-        run: echo "OUT=$RUNNER_TEMP/blog-draft" >> "$GITHUB_ENV"
+        run: |
+          echo "OUT=$RUNNER_TEMP/blog-draft" >> "$GITHUB_ENV"
+          echo "HAS_ADC=${{ secrets.GOOGLE_ADC_JSON != '' }}" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: npm }
       - run: npm ci
+      # Reader demand: a 28-day Search Console + GA4 brief the agent reads when choosing a topic.
+      # Needs the GOOGLE_ADC_JSON secret (an authorized_user ADC file with webmasters.readonly and
+      # analytics.readonly — see ~/Websites/home/docs/search-and-analytics.md). Skipped without it,
+      # and a failure here never blocks the draft: the agent then runs exactly as before.
+      - name: Search and analytics brief
+        if: ${{ env.HAS_ADC == 'true' }}
+        continue-on-error: true
+        env:
+          BLOG_OUT_DIR: ${{ env.OUT }}
+          GOOGLE_ADC_JSON: ${{ secrets.GOOGLE_ADC_JSON }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$GOOGLE_ADC_JSON" > "$RUNNER_TEMP/adc.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/adc.json" npx tsx scripts/search-brief.mts
+          rm -f "$RUNNER_TEMP/adc.json"
       - name: Research and draft
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
