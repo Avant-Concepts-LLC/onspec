@@ -56,6 +56,8 @@ interface Draft {
   tags: string[];
   sources: DraftSource[];
   blocks: DraftBlock[];
+  /** One or two sentences on how the reader-demand brief shaped the topic; "" when there was no brief. */
+  demandNote?: string;
 }
 
 const ALL_BLOCK_TYPES: BlockType[] = ["lead", "h2", "p", "pull", "list", "code", "closing"];
@@ -87,13 +89,14 @@ function loadVoice(file: string): string {
 const DRAFT_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["slug", "title", "dek", "description", "tags", "sources", "blocks"],
+  required: ["slug", "title", "dek", "description", "tags", "sources", "blocks", "demandNote"],
   properties: {
     slug: { type: "string", description: "kebab-case, 3-6 words" },
     title: { type: "string", description: "concrete and specific; no colons, no clickbait" },
     dek: { type: "string", description: "one or two sentences shown under the title" },
     description: { type: "string", description: "meta description, under 160 characters" },
     tags: { type: "array", items: { type: "string" } },
+    demandNote: { type: "string", description: "one or two sentences: which reader-demand item the topic answers, or why nothing in the brief was usable; empty string when no brief was given" },
     sources: {
       type: "array",
       items: {
@@ -268,6 +271,7 @@ ${SITE.writing}
 - Citations: place a marker like [cite:source-id] immediately after the claim it supports. Every marker's id must exist in "sources". Cite generously: every number and every industry fact gets a marker.
 - "sources": "id" is a short kebab-case handle; "date" is the source's publication date as YYYY-MM-DD; "author" is null when unknown; "url" is the page you actually read.
 - "slug": kebab-case, 3-6 words. "description": under 160 characters. "dek": one or two sentences shown under the title. "tags": 2-4 short labels.
+- "demandNote": ${opts.demand ? "one or two plain sentences for the human reviewer: which item in READER DEMAND this topic answers, or, if you passed on the brief, why (typically: those queries are navigational, or no fresh citable material exists for them). Be specific; name the query or page." : "an empty string (no reader-demand brief was given)."}
 
 STEP 3 — Return the finished post in the required JSON shape and nothing else.`;
 }
@@ -442,13 +446,14 @@ function prBody(opts: { draft: Draft; words: number; warnings: string[]; cutoff:
     `Preview deploy renders ${SITE.url}${SITE.blogPath}/${draft.slug}`,
   ];
   return [
-    "Auto-generated draft from the monthly blog agent (`scripts/blog-draft.mts` via `.github/workflows/blog-draft.yml`). Nothing publishes until this PR is merged; edit the post in place if it needs changes.",
+    "Auto-generated post from the monthly blog agent (`scripts/blog-draft.mts` via `.github/workflows/blog-draft.yml`). By default the workflow publishes it straight to the default branch and this text is the run summary; with the `review` input it is the body of a pull request instead. Edit the post in place if it needs changes.",
     "",
-    "**Review before merging**",
+    "**What a reviewer would check**",
     ...checks.map((c) => `- [ ] ${c}`),
     ...(opts.warnings.length ? ["", "**Agent warnings**", ...opts.warnings.map((w) => `- Warning: ${w}`)] : []),
     "",
     `Slug \`${draft.slug}\` · ${opts.words} words · ${draft.sources.length} sources · ${opts.model} · lookback ${opts.lookbackDays}d · demand brief ${opts.demand ? "used" : "none"}`,
+    ...(opts.demand ? ["", `**Agent on reader demand:** ${draft.demandNote?.trim() || "(the agent left no note)"}`] : []),
     ...(opts.demand ? ["", "<details><summary>Reader-demand brief the agent saw (scripts/search-brief.mts)</summary>", "", "```", opts.demand, "```", "", "</details>"] : []),
     "",
   ].join("\n");

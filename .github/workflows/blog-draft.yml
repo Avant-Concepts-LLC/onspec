@@ -1,7 +1,8 @@
 name: Blog draft
 # Monthly research-and-draft agent. scripts/blog-draft.mts researches recent sources with Claude,
-# writes the post into the repo, and this workflow commits it to blog/draft-<slug> and opens a PR
-# for human review. Same workflow in every sibling repo — see ~/Websites/home/docs/blog-pipeline.md.
+# writes the post into the repo, and this workflow commits it straight to the default branch (or,
+# with the `review` input, to blog/draft-<slug> behind a pull request). Same workflow in every
+# sibling repo — see ~/Websites/home/docs/blog-pipeline.md.
 on:
   schedule:
     - cron: "0 13 1 * *"   # 1st of each month, 13:00 UTC (9am ET)
@@ -11,7 +12,11 @@ on:
         description: "Only cite sources published within this many days (blank = the site's own default)"
         default: ""
       dry_run:
-        description: "Research and draft, but open no PR (the draft is attached as a run artifact)"
+        description: "Research and draft, but publish nothing (the draft is attached as a run artifact)"
+        type: boolean
+        default: false
+      review:
+        description: "Open a pull request instead of publishing straight to the default branch"
         type: boolean
         default: false
 
@@ -66,26 +71,36 @@ jobs:
           name: blog-draft
           path: ${{ env.OUT }}
           if-no-files-found: ignore
-      - name: Open pull request
+      # Publishes straight to the default branch (Ben's call, 2026-09-05: the validator is the gate).
+      # The `review` input keeps the old behaviour: a blog/draft-<slug> branch and a pull request.
+      - name: Publish
         if: ${{ inputs.dry_run != true }}
         env:
           GH_TOKEN: ${{ github.token }}
+          REVIEW: ${{ inputs.review == true && '1' || '' }}
         run: |
           set -euo pipefail
           SLUG=$(jq -r .slug "$OUT/summary.json")
           TITLE=$(jq -r .title "$OUT/summary.json")
-          BRANCH="blog/draft-$SLUG"
-          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then BRANCH="$BRANCH-${{ github.run_number }}"; fi
+          BASE="${{ github.event.repository.default_branch }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -z "$REVIEW" ]; then
+            git add -A
+            git commit -m "blog: $TITLE" -m "Published by the monthly blog agent: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            git pull --rebase origin "$BASE"
+            git push origin "HEAD:$BASE"
+            { echo "## Published: $TITLE"; echo; cat "$OUT/pr-body.md"; } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          BRANCH="blog/draft-$SLUG"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then BRANCH="$BRANCH-${{ github.run_number }}"; fi
           git checkout -b "$BRANCH"
           git add -A
           git commit -m "blog: $TITLE"
           git push -u origin "$BRANCH"
-          BASE="${{ github.event.repository.default_branch }}"
-          # The branch is pushed either way. PR creation needs Settings → Actions → General →
-          # "Allow GitHub Actions to create and approve pull requests"; without it, leave the
-          # branch and a compare link rather than failing the run.
+          # PR creation needs Settings → Actions → General → "Allow GitHub Actions to create and
+          # approve pull requests"; without it, leave the branch and a compare link rather than failing.
           if ! gh pr create --base "$BASE" --head "$BRANCH" --title "[blog draft] $TITLE" --body-file "$OUT/pr-body.md"; then
             echo "::warning::Could not open the PR. Draft is on branch $BRANCH — open it at ${{ github.server_url }}/${{ github.repository }}/compare/$BASE...$BRANCH"
           fi
