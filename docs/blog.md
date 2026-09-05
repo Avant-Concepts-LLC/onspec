@@ -1,8 +1,9 @@
 # Blog
 
 One researched post a month at [onspec.sh/blog](https://onspec.sh/blog) on spec-driven development
-and verifying AI-generated code. Drafted by an agent on the 1st; a post goes live only when the
-draft PR is merged.
+and verifying AI-generated code. Drafted by an agent on the 1st and published straight to `main`
+(since 2026-09-05; the validator is the gate, the review notes go to the Actions run summary, and
+the workflow's `review` input opens a PR instead).
 
 ## How it fits the static site
 
@@ -72,8 +73,8 @@ npx tsx --env-file=.env scripts/blog-draft.mts --dry-run
 npx tsx --env-file=.env scripts/blog-draft.mts --lookback 90
 ```
 
-## Reviewing a draft PR
+## Reviewing a post (after the fact, or in a PR when dispatched with `review`)
 
 Check every source URL, that claims about other tools are accurate as of their source dates, that
 any spec frontmatter in an example matches the docs page, and that the closing does not oversell.
-Edit the markdown in the PR, re-run `npm run build:blog`, and merge.
+Edit the markdown, re-run `npm run build:blog`, and push (or merge, in review mode).
