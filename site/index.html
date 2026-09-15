@@ -17,15 +17,9 @@
 <meta property="og:description" content="Specs that refuse to drift. The verification layer for spec-driven development.">
 <meta property="og:url" content="https://onspec.sh/">
 <link rel="canonical" href="https://onspec.sh/">
-<!-- Geordy AI References -->
-<link rel="llms" type="text/plain" href="https://ai.onspec.sh/llms.txt" title="LLMs.txt" data-ai="true" />
-<link rel="alternate" type="text/plain" href="https://ai.onspec.sh/humans.txt" title="Humans.txt" data-ai="true" />
-<link rel="alternate" type="text/markdown" href="https://ai.onspec.sh/index.md" title="Markdown" data-ai="true" />
-<link rel="alternate" type="application/ld+json" href="https://ai.onspec.sh/index.schema.json" title="Schema" data-ai="true" />
-<link rel="alternate" type="application/yaml" href="https://ai.onspec.sh/index.yaml" title="YAML" data-ai="true" />
-<link rel="alternate" type="application/json" href="https://ai.onspec.sh/index.og.json" title="Open Graph" data-ai="true" />
-<link rel="alternate" type="application/rss+xml" href="https://ai.onspec.sh/index.xml" title="RSS Feed" data-ai="true" />
-<link rel="alternate" type="application/json" href="https://ai.onspec.sh/index.manifest.json" title="Manifest" data-ai="true" />
+<!-- AI references. ai.onspec.sh (the Geordy pack) has no DNS record, so those links were dead; the site's own
+     llms.txt is the one machine-readable file that exists. Re-add the Geordy links once ai.onspec.sh resolves. -->
+<link rel="alternate" type="text/plain" href="https://onspec.sh/llms.txt" title="llms.txt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -270,7 +264,7 @@
   "@context": "https://schema.org",
   "@type": "Dataset",
   "name": "AI/LLM Resource Pack",
-  "description": "Machine-readable descriptions of onspec, the git-native spec verification CLI and GitHub Action, for LLMs and AI search: llms.txt, Markdown, YAML, JSON-LD schema, RSS and manifest files.",
+  "description": "Machine-readable description of onspec, the git-native spec verification CLI and GitHub Action, for LLMs and AI search, published as llms.txt.",
   "url": "https://onspec.sh/",
   "creator": { "@type": "Organization", "name": "Avant Concepts LLC", "url": "https://www.avant-concepts.com/" },
   "license": "https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE",
@@ -278,83 +272,9 @@
   "distribution": [
     {
       "@type": "DataDownload",
-      "name": "YAML Configuration",
-      "contentUrl": "https://ai.onspec.sh/index.yaml",
-      "encodingFormat": "application/yaml",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
-    },
-    {
-      "@type": "DataDownload",
-      "name": "Markdown Documentation",
-      "contentUrl": "https://ai.onspec.sh/index.md",
-      "encodingFormat": "text/markdown",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
-    },
-    {
-      "@type": "DataDownload",
       "name": "LLMs Configuration (llms.txt)",
-      "contentUrl": "https://ai.onspec.sh/llms.txt",
-      "encodingFormat": "text/plain",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
-    },
-    {
-      "@type": "DataDownload",
-      "name": "Schema JSON",
-      "contentUrl": "https://ai.onspec.sh/index.schema.json",
-      "encodingFormat": "application/ld+json",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
-    },
-    {
-      "@type": "DataDownload",
-      "name": "RSS Feed",
-      "contentUrl": "https://ai.onspec.sh/index.xml",
-      "encodingFormat": "application/rss+xml",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
-    },
-    {
-      "@type": "DataDownload",
-      "name": "Manifest.json",
-      "contentUrl": "https://ai.onspec.sh/index.manifest.json",
-      "encodingFormat": "application/json",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
-    },
-    {
-      "@type": "DataDownload",
-      "name": "Humans.txt",
-      "contentUrl": "https://ai.onspec.sh/humans.txt",
-      "encodingFormat": "text/plain",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
-    },
-    {
-      "@type": "DataDownload",
-      "name": "OG.json",
-      "contentUrl": "https://ai.onspec.sh/index.og.json",
-      "encodingFormat": "application/json",
-      "additionalProperty": [
-        { "@type": "PropertyValue", "name": "audience", "value": "LLM" },
-        { "@type": "PropertyValue", "name": "updateFrequency", "value": "weekly" }
-      ]
+      "contentUrl": "https://onspec.sh/llms.txt",
+      "encodingFormat": "text/plain"
     }
   ]
 }
