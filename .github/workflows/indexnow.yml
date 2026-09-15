@@ -1,0 +1,41 @@
+name: IndexNow
+
+# After each successful Vercel production deploy, tell IndexNow (Bing — and through Bing, ChatGPT
+# search and Copilot) which sitemap URLs changed in the last 3 days. A manual run can resubmit every
+# URL. Script: scripts/indexnow.mts. Design: ~/Websites/home/docs/indexnow.md.
+#
+#   gh workflow run indexnow.yml -f all=true
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      all:
+        description: Submit every sitemap URL, not just ones modified in the last 3 days
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    # Vercel's GitHub integration posts deployment statuses with environment "Production" for prod
+    # deploys and "Preview" for branches; only production changes what the sitemaps list.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment_status.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      # No npm ci: the script has no imports and Node 24 strips its type annotations natively.
+      - name: Submit changed URLs
+        run: node scripts/indexnow.mts ${{ inputs.all && '--all' || '' }}
