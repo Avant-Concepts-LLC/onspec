@@ -16,6 +16,10 @@ import { marked } from "marked";
 const POSTS_DIR = "content/posts";
 const SITE_DIR = "site";
 const ORIGIN = "https://onspec.sh";
+// Avant Concepts LLC writes and publishes onspec. onspec.sh has no image assets of its own, so the publisher logo is
+// Avant's existing apple-touch-icon and posts carry no `image` until the site gets an OG image.
+const AVANT = { "@type": "Organization", name: "Avant Concepts", url: "https://www.avant-concepts.com/" };
+const PUBLISHER = { ...AVANT, logo: { "@type": "ImageObject", url: "https://www.avant-concepts.com/apple-touch-icon.png", width: 180, height: 180 } };
 
 export interface BlogSource { n: number; title: string; publication?: string; author?: string | null; date?: string; url: string }
 export interface BlogPost {
@@ -24,6 +28,7 @@ export interface BlogPost {
   description: string;
   dek: string;
   date: string;
+  updated: string;
   readingTime: string;
   tags: string[];
   sources: BlogSource[];
@@ -39,12 +44,14 @@ export function loadPosts(): BlogPost[] {
   for (const f of fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith(".md"))) {
     const { data, content } = matter(fs.readFileSync(path.join(POSTS_DIR, f), "utf8"));
     const words = content.split(/\s+/).filter(Boolean).length;
+    const isoDate = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? ""));
     posts.push({
       slug: f.replace(/\.md$/, ""),
       title: String(data.title ?? ""),
       description: String(data.description ?? ""),
       dek: String(data.dek ?? data.description ?? ""),
-      date: data.date instanceof Date ? data.date.toISOString().slice(0, 10) : String(data.date ?? ""),
+      date: isoDate(data.date),
+      updated: isoDate(data.updated ?? data.date),
       readingTime: String(data.readingTime ?? `${Math.max(1, Math.round(words / 220))} min read`),
       tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
       sources: Array.isArray(data.sources) ? (data.sources as BlogSource[]) : [],
@@ -160,7 +167,7 @@ ${opts.body}
 
 <footer>
   <div class="wrap foot">
-    <span class="mono">© 2026 <a href="https://avant-concepts.com" style="color: inherit">Avant Concepts LLC</a></span>
+    <span class="mono">© 2026 <a href="https://www.avant-concepts.com/" style="color: inherit">Avant Concepts LLC</a></span>
     <div class="foot-links">
       <a href="/">Home</a>
       <a href="/docs">Docs</a>
@@ -189,12 +196,13 @@ function postPage(p: BlogPost): string {
     headline: p.title,
     description: p.description,
     datePublished: p.date,
+    dateModified: p.updated,
     url,
     mainEntityOfPage: url,
     isPartOf: { "@id": `${ORIGIN}/blog` },
     keywords: p.tags.join(", "),
-    author: { "@type": "Organization", name: "Avant Concepts", url: "https://avant-concepts.com" },
-    publisher: { "@type": "Organization", name: "onspec", url: ORIGIN },
+    author: AVANT,
+    publisher: PUBLISHER,
     citation: p.sources.map((s) => ({ "@type": "CreativeWork", name: s.title, url: s.url })),
   };
   const body = `<article>
@@ -220,8 +228,8 @@ function indexPage(posts: BlogPost[]): string {
     name: "onspec blog",
     url,
     description: "Monthly, sourced writing on spec-driven development and verifying AI-generated code.",
-    publisher: { "@type": "Organization", name: "onspec", url: ORIGIN },
-    blogPost: posts.map((p) => ({ "@type": "BlogPosting", headline: p.title, url: `${ORIGIN}/blog/${p.slug}`, datePublished: p.date })),
+    publisher: PUBLISHER,
+    blogPost: posts.map((p) => ({ "@type": "BlogPosting", headline: p.title, description: p.description, url: `${ORIGIN}/blog/${p.slug}`, datePublished: p.date, dateModified: p.updated, author: AVANT, publisher: PUBLISHER })),
   };
   const list = posts.length
     ? posts.map((p) => `<a class="post" href="/blog/${p.slug}"><span class="eyebrow"><time datetime="${p.date}">${fmtDate(p.date)}</time> · ${esc(p.readingTime)}</span><p class="post-title">${esc(p.title)}</p><p class="post-desc">${esc(p.description)}</p></a>`).join("\n")
