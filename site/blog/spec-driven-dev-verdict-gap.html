@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WPP2D90B4G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WPP2D90B4G');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Spec-Driven Ecosystem Keeps Hand-Rolling Verdict Labels — onspec</title>
+<meta name="description" content="Spec Kit's backlog, an agent-drift bot, and fresh research all reinvent evidence-based verdicts for AI-generated code, but none ship it as a built-in feature.">
+<link rel="canonical" href="https://onspec.sh/blog/spec-driven-dev-verdict-gap">
+<meta property="og:title" content="The Spec-Driven Ecosystem Keeps Hand-Rolling Verdict Labels — onspec">
+<meta property="og:description" content="Spec Kit's backlog, an agent-drift bot, and fresh research all reinvent evidence-based verdicts for AI-generated code, but none ship it as a built-in feature.">
+<meta property="og:url" content="https://onspec.sh/blog/spec-driven-dev-verdict-gap">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"The Spec-Driven Ecosystem Keeps Hand-Rolling Verdict Labels","description":"Spec Kit's backlog, an agent-drift bot, and fresh research all reinvent evidence-based verdicts for AI-generated code, but none ship it as a built-in feature.","datePublished":"2026-10-01","dateModified":"2026-10-01","url":"https://onspec.sh/blog/spec-driven-dev-verdict-gap","mainEntityOfPage":"https://onspec.sh/blog/spec-driven-dev-verdict-gap","isPartOf":{"@id":"https://onspec.sh/blog"},"keywords":"spec-driven-development, github-spec-kit, agent-drift, verification","author":{"@type":"Organization","name":"Avant Concepts","url":"https://www.avant-concepts.com/"},"publisher":{"@type":"Organization","name":"Avant Concepts","url":"https://www.avant-concepts.com/","logo":{"@type":"ImageObject","url":"https://www.avant-concepts.com/apple-touch-icon.png","width":180,"height":180}},"citation":[{"@type":"CreativeWork","name":"Open issues · github/spec-kit","url":"https://github.com/github/spec-kit/issues"},{"@type":"CreativeWork","name":"Releases · github/spec-kit","url":"https://github.com/github/spec-kit/releases"},{"@type":"CreativeWork","name":"Agent Drift Detected - 2026-09-07 · Issue #5642 · rjmurillo/ai-agents","url":"https://github.com/rjmurillo/ai-agents/issues/5642"},{"@type":"CreativeWork","name":"SDAD: Spec-Driven Agentic Development for the AI-Native SDLC","url":"https://arxiv.org/pdf/2608.20341"},{"@type":"CreativeWork","name":"Introducing Consort: A Spec-First Agent Framework for Enforced, Test-Driven Development on Live Database Branches","url":"https://arxiv.org/pdf/2609.09671"}]}</script>
+<style>
+  :root {
+    --bg: #0b0d10; --bg-raised: #11141a; --bg-panel: #0e1116; --line: #1e232c; --line-soft: #171b22;
+    --text: #e8ebef; --text-dim: #9aa3b0; --text-faint: #616a78; --accent: #3ecf8e; --accent-dim: #2a8f64;
+    --radius: 10px; --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--text); font-family: "Geist", -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  nav.top { position: sticky; top: 0; z-index: 40; height: 64px; border-bottom: 1px solid var(--line-soft); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm { color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 14px; transition: border-color .2s, background .2s; }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  article { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .eyebrow { font-family: "Geist Mono", monospace; font-size: 13px; color: var(--text-faint); }
+  h1 { font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.03em; font-weight: 700; margin-top: 10px; }
+  .lede { margin-top: 12px; color: var(--text-dim); font-size: 1.1rem; }
+  .meta { margin-top: 16px; font-size: 13.5px; color: var(--text-faint); display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--text-dim); }
+  .body { margin-top: 40px; }
+  .body h2 { font-size: 1.35rem; letter-spacing: -0.02em; font-weight: 700; margin-top: 48px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+  .body h3 { font-size: 1.05rem; font-weight: 600; margin-top: 30px; }
+  .body p { margin-top: 14px; color: var(--text-dim); }
+  .body p:first-child { color: var(--text); font-size: 1.08rem; }
+  .body strong { color: var(--text); }
+  .body ul, .body ol { margin: 12px 0 0 20px; color: var(--text-dim); }
+  .body li { margin-top: 6px; }
+  .body blockquote { margin-top: 20px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--text); font-size: 1.1rem; }
+  .body code { background: var(--bg-raised); border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text); }
+  .body pre { margin-top: 16px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; font-size: 12.8px; line-height: 1.7; overflow-x: auto; color: var(--text-dim); }
+  .body pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+  .body a { color: var(--accent); }
+  .sources { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+  .sources h2 { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); }
+  .sources ol { margin: 12px 0 0 0; list-style: none; font-size: 14px; }
+  .sources li { margin-top: 8px; color: var(--text-dim); }
+  .sources .n { color: var(--text-faint); margin-right: 8px; font-family: "Geist Mono", monospace; }
+  .sources a { color: var(--text); }
+  .sources a:hover { color: var(--accent); }
+  .cta { margin-top: 48px; padding: 20px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-raised); color: var(--text-dim); font-size: 15px; }
+  .cta a { color: var(--accent); }
+  .list { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .list h1 { margin-top: 10px; }
+  .post { display: block; padding: 22px 0; border-bottom: 1px solid var(--line-soft); }
+  .post:hover .post-title { color: var(--accent); }
+  .post-title { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; transition: color .15s; }
+  .post-desc { margin-top: 6px; color: var(--text-dim); }
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-faint); }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ blog</span></a>
+    <div class="nav-links">
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <p class="eyebrow">blog / spec-driven-dev-verdict-gap</p>
+  <h1>The Spec-Driven Ecosystem Keeps Hand-Rolling Verdict Labels</h1>
+  <p class="lede">Across Spec Kit's backlog, an agent-drift bot, and new enforcement research, teams are rebuilding the same evidence-based verdict by hand instead of shipping it as a feature.</p>
+  <div class="meta"><time datetime="2026-10-01">Oct 1, 2026</time><span>·</span><span>4 min read</span><span class="tag">spec-driven-development</span><span class="tag">github-spec-kit</span><span class="tag">agent-drift</span><span class="tag">verification</span></div>
+  <div class="body">
+<p>Every corner of the spec-driven development ecosystem has independently reinvented the same thing this quarter: a label that says whether a claim has evidence behind it. GitHub&#39;s own Spec Kit backlog runs on verdict tags. An open source agent-definition project runs a bot that flags drift between agents and their templates. A new enforcement framework in the research literature routes test execution through live database branches instead of trusting an agent&#39;s self-report. None of these projects call what they built a verification layer. All of them are building one anyway, by hand, one label and one script at a time.</p>
+<h2>The backlog that talks like a spec</h2>
+<p>GitHub&#39;s Spec Kit is the most widely used open source toolkit for spec-driven development, and its own issue triage has quietly converged on verdict language. Maintainers tag backlog items with labels like evidence-backed fix or greenlit feature, land after review, and valid and in-scope but deprioritized, held behind the evidence gate [1]. Those are hand-applied human judgments. There is no conformance checker in the repository producing them; a person reads the issue and decides.</p>
+<p>That gap shows up as an actual backlog item, not just a pattern in label text. On September 30, 2026, a contributor opened an extension submission for Conformidad, a conformance-checks add-on for Spec Kit [1]. More than a year after the project&#39;s public launch, checking whether shipped code conforms to its own spec is still a proposed community extension, not a core capability.</p>
+<p>The releases that did ship that same week were about workflow plumbing: fixing non-ASCII handling in overlay files, stopping a PowerShell crash on non-Latin feature descriptions, adding a DeepSeek harness integration [2]. Useful, necessary work. None of it answers whether the code an agent just wrote matches the spec it was given.</p>
+<h2>Automation that can diff but can&#39;t judge</h2>
+<p>Drift detection does exist elsewhere in the ecosystem, just not pointed at code-to-spec conformance yet. An automated workflow in the open source rjmurillo/ai-agents project compares each AI agent&#39;s declared role against a shared canonical template and opens an issue when they diverge. On September 7, 2026, it flagged one agent, merge-resolver, at 20.3 percent similarity to its template, with the core-mission and responsibilities sections drifting apart [3].</p>
+<p>The bot&#39;s own recommended next step is to have a person decide whether that drift is intentional or accidental [3]. That is the honest limit of a similarity score: it can tell you two things no longer match, not which one is right. A percentage is not a verdict.</p>
+<h2>Research is moving the judgment into tests, not prompts</h2>
+<p>The research side is further along on closing that gap than the tooling is. A September 2026 paper describes Consort, a framework that enforces test-driven development against a spec by running tests against live, branched database state rather than letting the agent report its own pass or fail [5]. The judgment comes from execution, not from asking the model if it is done.</p>
+<p>The detail that matters in that design is where the check happens. Running assertions against a live, branched copy of real data closes a gap that tests over mocked state tend to leave open: an agent can satisfy a test double without ever proving the spec holds against data shaped like production [5].</p>
+<p>That same split between what agents get trusted to judge and what still needs a mechanical check runs through the academic framing of spec-driven development lifecycles more broadly. Agents can draft requirement structures and propose acceptance criteria, but human or verification agents still adjudicate conformance to architecture and coding policy once implementation starts [4]. Conformance checking keeps getting named as a distinct, necessary step, and then left for later.</p>
+<p>Put together, the pattern is less about any one project falling short and more about where the industry&#39;s attention is actually going. Teams are investing real engineering effort in detecting that something changed; almost none of that effort goes into judging whether the change still satisfies the spec it was supposed to implement. Diffing is cheap and already automated in several places. Adjudication is still manual, and still scattered across whichever tool happened to notice the mismatch first.</p>
+<p>Four different projects, built by people who are not coordinating with each other, keep landing on the same shape of solution:</p>
+<ul>
+<li>Spec Kit&#39;s own issue triage, where maintainers manually tag backlog items as evidence-backed fixes or hold them behind an evidence gate [1]</li>
+<li>A standalone drift-detection bot that flags agent definitions diverging from a shared template, then asks a human to rule on intent [3]</li>
+<li>A proposed Spec Kit extension for conformance checks, still sitting as an open community submission rather than a shipped feature [1]</li>
+<li>A research framework that swaps agent self-report for test execution against live, branched data [5]</li>
+</ul>
+<pre><code class="language-yaml">agent: merge-resolver
+detected: 2026-09-07T09:12:00Z
+similarity_to_template: 20.3%
+drifting_sections: [core_mission, key_responsibilities]
+verdict: uncertain
+evidence: diff only, no spec to check against
+next_step: human review required
+</code></pre>
+<p>onspec does not replace any of this ad hoc machinery; it is what it is reaching for. Every acceptance criterion gets a verdict anchored to test results and file evidence, with an LLM judgment used only where deterministic evidence is missing, and code no approved spec governs gets flagged as drift. It does not write the spec for you, and it is not a test runner. It reads what the spec and the tests already proved, and says plainly what is still unproven.</p>
+
+  </div>
+  <section class="sources" aria-label="Sources"><h2>Sources</h2><ol><li id="src-1"><span class="n">[1]</span><a href="https://github.com/github/spec-kit/issues" rel="noopener nofollow" target="_blank">Open issues · github/spec-kit</a> <span>— GitHub (spec-kit repository), Wed Sep 30 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</span></li><li id="src-2"><span class="n">[2]</span><a href="https://github.com/github/spec-kit/releases" rel="noopener nofollow" target="_blank">Releases · github/spec-kit</a> <span>— GitHub (spec-kit repository), Tue Sep 08 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</span></li><li id="src-3"><span class="n">[3]</span><a href="https://github.com/rjmurillo/ai-agents/issues/5642" rel="noopener nofollow" target="_blank">Agent Drift Detected - 2026-09-07 · Issue #5642 · rjmurillo/ai-agents</a> <span>— GitHub (rjmurillo/ai-agents repository), Mon Sep 07 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</span></li><li id="src-4"><span class="n">[4]</span><a href="https://arxiv.org/pdf/2608.20341" rel="noopener nofollow" target="_blank">SDAD: Spec-Driven Agentic Development for the AI-Native SDLC</a> <span>— arXiv, Sat Aug 01 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</span></li><li id="src-5"><span class="n">[5]</span><a href="https://arxiv.org/pdf/2609.09671" rel="noopener nofollow" target="_blank">Introducing Consort: A Spec-First Agent Framework for Enforced, Test-Driven Development on Live Database Branches</a> <span>— arXiv, Tue Sep 01 2026 00:00:00 GMT+0000 (Coordinated Universal Time)</span></li></ol></section>
+  <div class="cta">Specs that refuse to drift: <a href="/docs">read the docs</a>, or <code>npm install -g onspec</code> and run <code>onspec lint</code> on a spec you already have.</div>
+</article>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">© 2026 <a href="https://www.avant-concepts.com/" style="color: inherit">Avant Concepts LLC</a></span>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a href="https://www.npmjs.com/package/onspec">npm</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
