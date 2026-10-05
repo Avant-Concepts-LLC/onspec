@@ -54,7 +54,8 @@ export function loadPosts(): BlogPost[] {
       updated: isoDate(data.updated ?? data.date),
       readingTime: String(data.readingTime ?? `${Math.max(1, Math.round(words / 220))} min read`),
       tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-      sources: Array.isArray(data.sources) ? (data.sources as BlogSource[]) : [],
+      // YAML parses an unquoted source date as a Date; String() of that is a full local-time string.
+      sources: Array.isArray(data.sources) ? (data.sources as BlogSource[]).map((s) => ({ ...s, date: s.date ? isoDate(s.date) : undefined })) : [],
       html: marked.parse(content, { async: false }) as string,
     });
   }
@@ -187,7 +188,7 @@ function postPage(p: BlogPost): string {
   const url = `${ORIGIN}/blog/${p.slug}`;
   const sources = p.sources.length
     ? `<section class="sources" aria-label="Sources"><h2>Sources</h2><ol>${p.sources
-        .map((s, i) => `<li id="src-${s.n ?? i + 1}"><span class="n">[${s.n ?? i + 1}]</span><a href="${esc(s.url)}" rel="noopener nofollow" target="_blank">${esc(s.title)}</a>${s.publication ? ` <span>— ${esc(s.publication)}${s.date ? `, ${esc(String(s.date))}` : ""}</span>` : ""}</li>`)
+        .map((s, i) => `<li id="src-${s.n ?? i + 1}"><span class="n">[${s.n ?? i + 1}]</span><a href="${esc(s.url)}" rel="noopener nofollow" target="_blank">${esc(s.title)}</a>${s.publication ? ` <span>— ${esc(s.publication)}${s.date ? `, ${esc(/^\d{4}-\d{2}-\d{2}$/.test(s.date) ? fmtDate(s.date) : s.date)}` : ""}</span>` : ""}</li>`)
         .join("")}</ol></section>`
     : "";
   const jsonLd = {
@@ -256,7 +257,7 @@ function updateSitemap(posts: BlogPost[]): string | null {
   const today = new Date().toISOString().slice(0, 10);
   const entries = [
     `  <url><loc>${ORIGIN}/blog</loc><lastmod>${posts[0]?.date ?? today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`,
-    ...posts.map((p) => `  <url><loc>${ORIGIN}/blog/${p.slug}</loc><lastmod>${p.date}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`),
+    ...posts.map((p) => `  <url><loc>${ORIGIN}/blog/${p.slug}</loc><lastmod>${p.updated}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`),
   ].join("\n");
   const next = xml.slice(0, s) + `${start}\n${entries}\n` + xml.slice(e);
   if (next === xml) return null;

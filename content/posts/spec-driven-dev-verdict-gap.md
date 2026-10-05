@@ -1,84 +1,99 @@
 ---
-title: "The Spec-Driven Ecosystem Keeps Hand-Rolling Verdict Labels"
-description: "Spec Kit's backlog, an agent-drift bot, and fresh research all reinvent evidence-based verdicts for AI-generated code, but none ship it as a built-in feature."
-dek: "Across Spec Kit's backlog, an agent-drift bot, and new enforcement research, teams are rebuilding the same evidence-based verdict by hand instead of shipping it as a feature."
+title: "Checking Code Against the Spec Is Standard Now. Grounding the Verdict Isn't."
+description: "Spec Kit's converge step and its extension catalog check code against the spec. What still varies is what a verdict rests on: a model's reading, or a test."
+dek: "Spec Kit made assessing code against the spec a core step in June. Across the ecosystem, the open question is what a verdict rests on: a model reading the code, a similarity score, or a test the agent cannot edit."
 date: 2026-10-01
-readingTime: "4 min read"
+updated: 2026-10-05
+readingTime: "5 min read"
 tags: ["spec-driven-development", "github-spec-kit", "agent-drift", "verification"]
 sources:
   - n: 1
-    title: "Open issues · github/spec-kit"
+    title: "feat: add /speckit.converge command · Pull Request #3001 · github/spec-kit"
     publication: "GitHub (spec-kit repository)"
     author: null
-    date: 2026-09-30
-    url: "https://github.com/github/spec-kit/issues"
+    date: 2026-06-17
+    url: "https://github.com/github/spec-kit/pull/3001"
   - n: 2
-    title: "Releases · github/spec-kit"
+    title: "templates/commands/converge.md · github/spec-kit"
     publication: "GitHub (spec-kit repository)"
     author: null
-    date: 2026-09-08
-    url: "https://github.com/github/spec-kit/releases"
+    date: 2026-09-18
+    url: "https://github.com/github/spec-kit/blob/main/templates/commands/converge.md"
   - n: 3
+    title: "fix: clarify converge assessment of completion claims · Pull Request #4621 · github/spec-kit"
+    publication: "GitHub (spec-kit repository)"
+    author: null
+    date: 2026-09-18
+    url: "https://github.com/github/spec-kit/pull/4621"
+  - n: 4
+    title: "extensions/catalog.community.json · github/spec-kit"
+    publication: "GitHub (spec-kit repository)"
+    author: null
+    date: 2026-10-02
+    url: "https://github.com/github/spec-kit/blob/main/extensions/catalog.community.json"
+  - n: 5
+    title: "[Extension]: Conformidad — Software Humano conformance checks · Issue #4803 · github/spec-kit"
+    publication: "GitHub (spec-kit repository)"
+    author: "Damián Acuña"
+    date: 2026-09-30
+    url: "https://github.com/github/spec-kit/issues/4803"
+  - n: 6
     title: "Agent Drift Detected - 2026-09-07 · Issue #5642 · rjmurillo/ai-agents"
     publication: "GitHub (rjmurillo/ai-agents repository)"
-    author: "rjmurillo"
+    author: null
     date: 2026-09-07
     url: "https://github.com/rjmurillo/ai-agents/issues/5642"
-  - n: 4
-    title: "SDAD: Spec-Driven Agentic Development for the AI-Native SDLC"
-    publication: "arXiv"
-    author: null
-    date: 2026-08-01
-    url: "https://arxiv.org/pdf/2608.20341"
-  - n: 5
+  - n: 7
     title: "Introducing Consort: A Spec-First Agent Framework for Enforced, Test-Driven Development on Live Database Branches"
     publication: "arXiv"
-    author: null
-    date: 2026-09-01
-    url: "https://arxiv.org/pdf/2609.09671"
+    author: "Kevin Hartman"
+    date: 2026-09-09
+    url: "https://arxiv.org/abs/2609.09671"
 ---
 
-Every corner of the spec-driven development ecosystem has independently reinvented the same thing this quarter: a label that says whether a claim has evidence behind it. GitHub's own Spec Kit backlog runs on verdict tags. An open source agent-definition project runs a bot that flags drift between agents and their templates. A new enforcement framework in the research literature routes test execution through live database branches instead of trusting an agent's self-report. None of these projects call what they built a verification layer. All of them are building one anyway, by hand, one label and one script at a time.
+Checking AI-written code against its spec is no longer an idea waiting for a tool. GitHub's Spec Kit made it a core step in June, its community catalog carries a growing shelf of extensions that verify, trace or watch for drift, and a new research framework builds the check into the build itself. What is still unsettled is what a verdict rests on. Across the tools shipping this quarter, a verdict comes from one of three places: a model that reads the code and decides, a script that measures how far two documents have drifted apart, or a test the agent cannot edit.
 
-## The backlog that talks like a spec
+## Spec Kit's core loop ends in an assessment
 
-GitHub's Spec Kit is the most widely used open source toolkit for spec-driven development, and its own issue triage has quietly converged on verdict language. Maintainers tag backlog items with labels like evidence-backed fix or greenlit feature, land after review, and valid and in-scope but deprioritized, held behind the evidence gate [1]. Those are hand-applied human judgments. There is no conformance checker in the repository producing them; a person reads the issue and decides.
+Spec Kit added a `/speckit.converge` command in June [1]. It runs after implement, reads `spec.md`, `plan.md` and `tasks.md` as the only source of intent, assesses the current code against every functional requirement, success criterion and acceptance scenario, and classifies each gap as missing, partial, contradicts or unrequested [2]. Remaining work is appended to `tasks.md` as new tasks, each traced to the requirement it came from, and implement and converge alternate until converge has nothing left to append [2].
 
-That gap shows up as an actual backlog item, not just a pattern in label text. On September 30, 2026, a contributor opened an extension submission for Conformidad, a conformance-checks add-on for Spec Kit [1]. More than a year after the project's public launch, checking whether shipped code conforms to its own spec is still a proposed community extension, not a core capability.
+That is a real conformance check, and in September it got stricter. A change merged on September 18 tells the assessor to include every task regardless of its checkbox, because "completion claims are not evidence" [3]. An agent marking a task done no longer counts as proof that the work exists.
 
-The releases that did ship that same week were about workflow plumbing: fixing non-ASCII handling in overlay files, stopping a PowerShell crash on non-Latin feature descriptions, adding a DeepSeek harness integration [2]. Useful, necessary work. None of it answers whether the code an agent just wrote matches the spec it was given.
+The mechanism is still a model reading code. Converge is a prompt: the assessing agent inventories the requirements, scopes its search to the files the plan and tasks name plus a keyword search, and writes each finding with the file or area it observed [2]. The tests that came with the September change say so plainly. They check that the prompt contains the new instructions, and "do not execute an LLM or assert how an LLM will respond" [3]. That is the right test for a prompt. It also means nothing in the core loop ties a verdict to a test result, and converge says outright that it is not a diff tool: no git, no branch comparison, no history [2].
 
-## Automation that can diff but can't judge
+## The catalog fills in around it
 
-Drift detection does exist elsewhere in the ecosystem, just not pointed at code-to-spec conformance yet. An automated workflow in the open source rjmurillo/ai-agents project compares each AI agent's declared role against a shared canonical template and opens an issue when they diverge. On September 7, 2026, it flagged one agent, merge-resolver, at 20.3 percent similarity to its template, with the core-mission and responsibilities sections drifting apart [3].
+Spec Kit's community catalog listed 178 extensions as of October 2, with 16 tagged traceability, 6 verification and 6 drift [4]. Their own descriptions cover most of what a verification layer does: a post-implementation gate that "validates implemented code against specification artifacts" (verify), CI gates that "check drift, and block merges on gaps" (ci-guard), a requirement-to-test traceability matrix built from `spec.md` and the test suite (trace), and a hunt for "phantom completions," tasks marked done with no implementation behind them (verify-tasks) [4].
 
-The bot's own recommended next step is to have a person decide whether that drift is intentional or accidental [3]. That is the honest limit of a similarity score: it can tell you two things no longer match, not which one is right. A percentage is not a verdict.
+The newest entry shows which way some authors lean. Conformidad, submitted September 30 and in the catalog by October 2, checks that a project's spec and plan contain the sections the Software Humano manifesto requires, before implementation starts [4] [5]. It checks documents, not code. But its submission leads with its mechanism: "Deterministic: it runs as a script, not through the agent, so the agent cannot skip it silently" [5]. Its author also reports a bug found in use, a success message that reported green on a project whose governing document was newer than its spec [5]. A deterministic check can still be wrong. When it is, someone can read the script and see why.
 
-## Research is moving the judgment into tests, not prompts
+## A score is not a verdict
 
-The research side is further along on closing that gap than the tooling is. A September 2026 paper describes Consort, a framework that enforces test-driven development against a spec by running tests against live, branched database state rather than letting the agent report its own pass or fail [5]. The judgment comes from execution, not from asking the model if it is done.
+Measurement without judgment shows up outside Spec Kit too. The open source rjmurillo/ai-agents project runs a workflow that compares each Claude agent definition against a shared template and opens an issue when they diverge. On September 7 it flagged one agent, trimmed here from the issue [6]:
 
-The detail that matters in that design is where the check happens. Running assertions against a live, branched copy of real data closes a gap that tests over mocked state tend to leave open: an agent can satisfy a test double without ever proving the spec holds against data shaped like production [5].
+```text
+### merge-resolver
+- **Overall similarity**: 20.3%
+- **Drifting sections**: Core Mission, Key Responsibilities, Constraints, Handoff Options, Execution Mindset, Memory Protocol, Handoff Protocol
 
-That same split between what agents get trusted to judge and what still needs a mechanical check runs through the academic framing of spec-driven development lifecycles more broadly. Agents can draft requirement structures and propose acceptance criteria, but human or verification agents still adjudicate conformance to architecture and coding policy once implementation starts [4]. Conformance checking keeps getting named as a distinct, necessary step, and then left for later.
-
-Put together, the pattern is less about any one project falling short and more about where the industry's attention is actually going. Teams are investing real engineering effort in detecting that something changed; almost none of that effort goes into judging whether the change still satisfies the spec it was supposed to implement. Diffing is cheap and already automated in several places. Adjudication is still manual, and still scattered across whichever tool happened to notice the mismatch first.
-
-Four different projects, built by people who are not coordinating with each other, keep landing on the same shape of solution:
-
-- Spec Kit's own issue triage, where maintainers manually tag backlog items as evidence-backed fixes or hold them behind an evidence gate [1]
-- A standalone drift-detection bot that flags agent definitions diverging from a shared template, then asks a human to rule on intent [3]
-- A proposed Spec Kit extension for conformance checks, still sitting as an open community submission rather than a shipped feature [1]
-- A research framework that swaps agent self-report for test execution against live, branched data [5]
-
-```yaml
-agent: merge-resolver
-detected: 2026-09-07T09:12:00Z
-similarity_to_template: 20.3%
-drifting_sections: [core_mission, key_responsibilities]
-verdict: uncertain
-evidence: diff only, no spec to check against
-next_step: human review required
+**Section Details:**
+- Core Mission: 0.0% similar
+- Key Responsibilities: 0.0% similar
+- Constraints: 62.2% similar
 ```
 
-onspec does not replace any of this ad hoc machinery; it is what it is reaching for. Every acceptance criterion gets a verdict anchored to test results and file evidence, with an LLM judgment used only where deterministic evidence is missing, and code no approved spec governs gets flagged as drift. It does not write the spec for you, and it is not a test runner. It reads what the spec and the tests already proved, and says plainly what is still unproven.
+Six of the seven sections score 0 percent. The issue's recommended next step is "Determine if drift is intentional or accidental," and four weeks later it is still open [6]. The bot is honest about its limit. A similarity score says two files no longer match. It cannot say which one is right, because neither the template nor the agent is a statement of intent that the other can be checked against.
+
+## Research moves the verdict into execution
+
+Consort, described in a September 9 paper, puts the verdict where the agent cannot reach it [7]. The paper sorts spec-first frameworks, naming Spec Kit, obra/superpowers, BMAD and GSD, by how they enforce discipline on the agent: by persuasion (prompt instructions the model may ignore), by front-loaded structure (strong specs, then a trusted build), or through controls the agent cannot edit [7]. Consort takes the third route: a deterministic orchestrator, human-approved gates, immutable tests, and a green result that has to pass against a live, branched database [7]. The paper frames its own claims as a pre-registered, testable hypothesis rather than a measured result [7].
+
+Read against that taxonomy, the ecosystem's checks sit at different points. Converge asks a model to assess honestly and tells it what does not count as evidence. Conformidad and the drift bot are scripts, but they measure documents, not behavior. Consort makes a test result the verdict and keeps the test out of the agent's hands.
+
+## Where the line actually falls
+
+The split that matters is no longer between projects that check and projects that don't. Spec Kit checks, its catalog checks, the bots check. The split is between verdicts a reader can reproduce, such as a test result or a script's output on the same commit, and verdicts that depend on what one model run decided to look at. Both have a place. A model can read requirements no test covers yet, and a test only proves what someone thought to assert. What a team needs is to know which kind of verdict it is looking at.
+
+onspec sits on the reproducible side of that line: each acceptance criterion gets a met, unmet or uncertain verdict anchored to test results and file evidence, an LLM judgment fills in only where that evidence is missing, and code no approved spec governs is flagged as drift. It needs approved specs to check against, and it is not a test runner.
+
+*Correction, October 5, 2026: An earlier version of this post said that checking code against its spec was not a core Spec Kit capability and was still only a proposed community extension. Spec Kit has shipped `/speckit.converge` as a core command since June. That version also described Conformidad as a code conformance check (it checks spec and plan documents against a manifesto), placed a set of Spec Kit fixes in the wrong week, and showed fields the drift bot never reported. The post has been rewritten around what the sources show.*
