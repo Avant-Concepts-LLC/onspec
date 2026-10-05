@@ -250,7 +250,10 @@ ${SITE.research}
 
 Source discipline:
 - Append "after:${opts.cutoff}" to search queries.
-- For each candidate source, confirm its publication date from the page or the result. If you cannot confirm the date is on or after ${opts.cutoff}, DROP the source. Do not guess.
+- For each candidate source, confirm its publication date from the page or the result. If you cannot confirm the date is on or after ${opts.cutoff}, DROP the source. Do not guess. Never infer a date from an ID, a URL or the window you searched; for a paper, use the first version's submission date.
+- Cite the specific page that says the thing: the issue, pull request, release, paper or docs page. Never a listing that changes daily (an issues list, a releases index, a search results page).
+- Before claiming that a tool lacks a feature, or that nobody does something yet, search that tool's own README, docs and changelog for it, not only its issue tracker or release notes, and cite the page that shows the gap. If you cannot confirm the absence, describe what exists instead.
+- Read what an extension, tool or paper actually does before using it as an example. A name that sounds relevant is not evidence.
 - When a page repeats data that someone else published first, follow it back and cite the original publisher, not the summary.
 - Every source must be one of: the organization that produced the data or made the announcement, a peer-reviewed or working paper, or an established news outlet reporting it. A company's own blog counts only for that company's own news.
 - Reject content marketing on sight, however well written: SEO "guides", "state of X 2026" roundups, statistics-listicles, and posts on a vendor's blog about a problem that vendor happens to sell software for. If a page's numbers have no named, linked origin, it is not a source.
@@ -268,6 +271,7 @@ ${SITE.writing}
 - ${SITE.words[0]}-${SITE.words[1]} words across the blocks.
 - Structure: one "lead" block (the thesis, no throat-clearing), then 2-4 "h2" sections of "p" blocks${allows("pull") ? ', at most one "pull" block (a single-sentence pull quote)' : ""}${allows("list") ? ', a "list" block where a short bulleted list beats a paragraph' : ""}${allows("code") ? ', a "code" block where a concrete example strengthens the point ("text" is the code, "items" is [language])' : ""}, ending with one "closing" block of one or two sentences.
 - Allowed block types: ${SITE.blockTypes.join(", ")}. "text" carries the copy for every type except "list", which uses "items" (leave "text" empty there). Set "items" to [] for every other block${allows("code") ? " except code" : ""}.
+- Accuracy: a claim about when something happened must match the date of the source that shows it.${allows("code") ? " A code block that shows a tool's output, a config or an issue is copied from the source (trimming is fine, invented fields are not); if you write an illustrative example instead, the text before it says so." : ""}
 - Citations: place a marker like [cite:source-id] immediately after the claim it supports. Every marker's id must exist in "sources". Cite generously: every number and every industry fact gets a marker.
 - "sources": "id" is a short kebab-case handle; "date" is the source's publication date as YYYY-MM-DD; "author" is null when unknown; "url" is the page you actually read.
 - "slug": kebab-case, 3-6 words. "description": under 160 characters. "dek": one or two sentences shown under the title. "tags": 2-4 short labels.
@@ -439,6 +443,7 @@ function prBody(opts: { draft: Draft; words: number; warnings: string[]; cutoff:
     "Every source URL loads and says what the post claims",
     "No source is content marketing: an SEO guide, a statistics roundup, or a vendor blog recycling someone else's numbers",
     `Source dates are on or after ${opts.cutoff} (no stale sources dressed as new)`,
+    "Every \"X lacks Y\" or \"nobody does Z yet\" claim holds up against X's own docs, not just its issue tracker",
     `Voice matches \`${SITE.voiceFile}\``,
     ...SITE.checklist,
     ...(opts.demand ? ["Topic answers something in the reader-demand brief below, or the brief had nothing usable and the agent said why"] : []),
