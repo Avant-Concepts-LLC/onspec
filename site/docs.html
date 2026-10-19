@@ -148,6 +148,62 @@
   .foot-links { display: flex; gap: 24px; }
   .foot-links a:hover { color: var(--text); }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does onspec work with GitLab CI?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Include the maintained template from your .gitlab-ci.yml, as shown under CI setup. It runs verify and drift on merge requests. With ONSPEC_GITLAB_TOKEN (a project access token with api scope) it keeps one self-updating MR note; without it, the report lands in the job log and as an artifact. Set ONSPEC_STRICT to \"true\" to fail the job on unmet criteria or drift."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does onspec need an LLM or an API key?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Criteria with verify: test resolve from your JUnit report and verify: assertion criteria from file contents, with no model involved; drift and lint never call one. Only criteria without deterministic evidence go to an LLM: Claude, under your own ANTHROPIC_API_KEY. Without a key, onspec makes no network calls and those criteria stay uncertain. onspec's own spec suite verifies with zero LLM calls. reverse needs a key unless you use --prompt-only with an agent you already trust."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What counts as evidence for a criterion?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each criterion names its own proof. For verify: test it is path/to/test.file::test name, and the result in your JUnit report is the verdict. For verify: assertion it is path/to/file#snippet, met exactly when the file contains the snippet. verify: manual takes free text and is never auto-passed. Without a pointer, an LLM judges the diff, and a met or unmet verdict that cites no file in the repo is downgraded to uncertain."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is onspec different from GitHub Spec Kit?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Spec Kit structures the work around generation: spec, plan and tasks for an agent to implement, and a /speckit.converge prompt where a model assesses the code against the spec. onspec runs on the pull request diff, finds the specs whose covers globs match the changed files, and takes each verdict from a named test or file assertion, with an LLM only for criteria that name neither. It checks code from any generator, Spec Kit included, against its own *.spec.md files."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does onspec work with Claude Code, Cursor and Kiro?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. onspec checks the git diff, not the tool that wrote it, so code from Claude Code, Cursor, Kiro or a human gets the same verdicts. Agents can draft specs as status: draft, run onspec verify before opening a PR, and read --format json output; approving a spec stays a human act in a reviewed PR. onspec reverse --prompt-only prints the drafting prompt for any agent you already trust, and --from-json ingests what it returns."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens on a hotfix that no spec covers?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "onspec drift flags it. A changed file that matches your code globs (default src/**) and that no spec covers is an unspecced change: write the spec or revert the code. A file covered only by a draft spec is a stale approval. Findings are advisory by default; --strict, or strict: \"true\" in the GitHub Action, fails the job. Drift detection is fully deterministic, so it needs no API key."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -178,11 +234,12 @@
     <a href="#config">Configuration</a>
     <a href="#ci">CI setup</a>
     <a href="#data">Data handling</a>
+    <a href="#faq">Frequently asked</a>
   </aside>
 
   <main>
     <h1>onspec documentation</h1>
-    <p class="lede">Everything here describes v1 behavior exactly. If the tool and this page disagree, that's a bug: <a href="https://github.com/Avant-Concepts-LLC/onspec/issues" style="color: var(--accent)">tell us</a>.</p>
+    <p class="lede">onspec is a CLI and GitHub Action that verifies a spec document (Markdown with YAML frontmatter) against the code in a pull request, with a met / unmet / uncertain verdict per acceptance criterion and the evidence for each. Everything here describes v1 behavior exactly. If the tool and this page disagree, that's a bug: <a href="https://github.com/Avant-Concepts-LLC/onspec/issues" style="color: var(--accent)">tell us</a>.</p>
 
     <section id="start">
       <h2>Getting started</h2>
@@ -380,6 +437,28 @@
         <li><strong>Never sent:</strong> your full repository, test results, environment variables, or anything for criteria that resolved deterministically. A fully test-anchored spec suite verifies with zero LLM calls.</li>
         <li><strong><code class="i">reverse</code></strong> sends the source and test files matched by your globs when invoked with a key, since drafting requires reading the code. Prefer not to? <code class="i">--prompt-only</code> plus <code class="i">--from-json</code> keeps drafting inside an agent you already trust, with validation done locally.</li>
       </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Frequently asked</h2>
+
+      <h3>Does onspec work with GitLab CI?</h3>
+      <p>Yes. Include the maintained template from your <code class="i">.gitlab-ci.yml</code>, as shown under <a href="#ci" style="color: var(--accent)">CI setup</a>. It runs <code class="i">verify</code> and <code class="i">drift</code> on merge requests. With <code class="i">ONSPEC_GITLAB_TOKEN</code> (a project access token with <code class="i">api</code> scope) it keeps one self-updating MR note; without it, the report lands in the job log and as an artifact. Set <code class="i">ONSPEC_STRICT</code> to <code class="i">"true"</code> to fail the job on unmet criteria or drift.</p>
+
+      <h3>Does onspec need an LLM or an API key?</h3>
+      <p>No. Criteria with <code class="i">verify: test</code> resolve from your JUnit report and <code class="i">verify: assertion</code> criteria from file contents, with no model involved; <code class="i">drift</code> and <code class="i">lint</code> never call one. Only criteria without deterministic evidence go to an LLM: Claude, under your own <code class="i">ANTHROPIC_API_KEY</code>. Without a key, onspec makes no network calls and those criteria stay uncertain. onspec's own spec suite verifies with zero LLM calls. <code class="i">reverse</code> needs a key unless you use <code class="i">--prompt-only</code> with an agent you already trust.</p>
+
+      <h3>What counts as evidence for a criterion?</h3>
+      <p>Each criterion names its own proof. For <code class="i">verify: test</code> it is <code class="i">path/to/test.file::test name</code>, and the result in your JUnit report is the verdict. For <code class="i">verify: assertion</code> it is <code class="i">path/to/file#snippet</code>, met exactly when the file contains the snippet. <code class="i">verify: manual</code> takes free text and is never auto-passed. Without a pointer, an LLM judges the diff, and a met or unmet verdict that cites no file in the repo is downgraded to uncertain.</p>
+
+      <h3>How is onspec different from GitHub Spec Kit?</h3>
+      <p>Spec Kit structures the work around generation: spec, plan and tasks for an agent to implement, and a <code class="i">/speckit.converge</code> prompt where a model assesses the code against the spec. onspec runs on the pull request diff, finds the specs whose <code class="i">covers</code> globs match the changed files, and takes each verdict from a named test or file assertion, with an LLM only for criteria that name neither. It checks code from any generator, Spec Kit included, against its own <code class="i">*.spec.md</code> files.</p>
+
+      <h3>Does onspec work with Claude Code, Cursor and Kiro?</h3>
+      <p>Yes. onspec checks the git diff, not the tool that wrote it, so code from Claude Code, Cursor, Kiro or a human gets the same verdicts. Agents can draft specs as <code class="i">status: draft</code>, run <code class="i">onspec verify</code> before opening a PR, and read <code class="i">--format json</code> output; approving a spec stays a human act in a reviewed PR. <code class="i">onspec reverse --prompt-only</code> prints the drafting prompt for any agent you already trust, and <code class="i">--from-json</code> ingests what it returns.</p>
+
+      <h3>What happens on a hotfix that no spec covers?</h3>
+      <p><code class="i">onspec drift</code> flags it. A changed file that matches your <code class="i">code</code> globs (default <code class="i">src/**</code>) and that no spec covers is an unspecced change: write the spec or revert the code. A file covered only by a draft spec is a stale approval. Findings are advisory by default; <code class="i">--strict</code>, or <code class="i">strict: "true"</code> in the GitHub Action, fails the job. Drift detection is fully deterministic, so it needs no API key.</p>
     </section>
   </main>
 </div>

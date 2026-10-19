@@ -1,7 +1,7 @@
 {
   "name": "onspec",
   "version": "1.2.0",
-  "description": "Specs that refuse to drift. Git-native verification layer for spec-driven development.",
+  "description": "CLI and GitHub Action that verifies a spec document (Markdown with YAML frontmatter) against the code in a pull request: met/unmet/uncertain per criterion.",
   "type": "module",
   "license": "MIT",
   "bin": {

@@ -266,7 +266,11 @@
   "name": "AI/LLM Resource Pack",
   "description": "Machine-readable description of onspec, the git-native spec verification CLI and GitHub Action, for LLMs and AI search, published as llms.txt.",
   "url": "https://onspec.sh/",
-  "creator": { "@type": "Organization", "name": "Avant Concepts LLC", "url": "https://www.avant-concepts.com/" },
+  "creator": {
+    "@type": "Organization",
+    "name": "Avant Concepts LLC",
+    "url": "https://www.avant-concepts.com/"
+  },
   "license": "https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE",
   "dateModified": "2026-08-25",
   "distribution": [
@@ -277,6 +281,27 @@
       "encodingFormat": "text/plain"
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "onspec",
+  "description": "onspec is a CLI and GitHub Action that verifies a spec document (Markdown with YAML frontmatter) against the code in a pull request, with a met / unmet / uncertain verdict per acceptance criterion and the evidence for each.",
+  "url": "https://onspec.sh/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (Node.js 20 or later)",
+  "license": "https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE",
+  "sameAs": [
+    "https://github.com/Avant-Concepts-LLC/onspec",
+    "https://www.npmjs.com/package/onspec"
+  ],
+  "creator": {
+    "@type": "Organization",
+    "name": "Avant Concepts LLC",
+    "url": "https://www.avant-concepts.com/"
+  }
 }
 </script>
 </head>
@@ -301,7 +326,7 @@
   <div class="wrap hero-grid">
     <div>
       <h1>Specs that refuse<br>to <span class="drift">drift</span>.</h1>
-      <p class="hero-sub">onspec checks every code change against the spec that governs it. Verdicts come from tests and evidence, not vibes.</p>
+      <p class="hero-sub">onspec is a CLI and GitHub Action that verifies a spec document (Markdown with YAML frontmatter) against the code in a pull request, with a met / unmet / uncertain verdict per acceptance criterion and the evidence for each.</p>
       <div class="hero-ctas">
         <div class="install">
           <span class="dollar">$</span>
