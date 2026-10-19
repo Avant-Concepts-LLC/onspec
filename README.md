@@ -1,5 +1,7 @@
 # onspec
 
+onspec is a CLI and GitHub Action that verifies a spec document (Markdown with YAML frontmatter) against the code in a pull request, with a met / unmet / uncertain verdict per acceptance criterion and the evidence for each.
+
 **Specs that refuse to drift.** A git-native verification layer for spec-driven development — works with any generator (Claude Code, Cursor, Kiro, Spec Kit output, or humans).
 
 Everyone builds the front half of spec-driven development: spec → generated code. onspec is the back half: proving the code *stays* true to the spec, PR after PR, hotfix after hotfix.
