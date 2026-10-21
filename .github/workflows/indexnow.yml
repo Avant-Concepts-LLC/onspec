@@ -2,7 +2,7 @@ name: IndexNow
 
 # After each successful Vercel production deploy, tell IndexNow (Bing — and through Bing, ChatGPT
 # search and Copilot) which sitemap URLs changed in the last 3 days. A manual run can resubmit every
-# URL. Script: scripts/indexnow.mts. Design: ~/Websites/home/docs/indexnow.md.
+# URL. Script: scripts/indexnow.mts. Design: ~/IdeaProjects/home/docs/indexnow.md.
 #
 #   gh workflow run indexnow.yml -f all=true
 

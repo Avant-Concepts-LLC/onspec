@@ -2,7 +2,7 @@ name: Blog draft
 # Monthly research-and-draft agent. scripts/blog-draft.mts researches recent sources with Claude,
 # writes the post into the repo, and this workflow commits it straight to the default branch (or,
 # with the `review` input, to blog/draft-<slug> behind a pull request). Same workflow in every
-# sibling repo — see ~/Websites/home/docs/blog-pipeline.md.
+# sibling repo — see ~/IdeaProjects/home/docs/blog-pipeline.md.
 on:
   schedule:
     - cron: "0 13 1 * *"   # 1st of each month, 13:00 UTC (9am ET)
@@ -45,7 +45,7 @@ jobs:
       - run: npm ci
       # Reader demand: a 28-day Search Console + GA4 brief the agent reads when choosing a topic.
       # Needs the GOOGLE_ADC_JSON secret (an authorized_user ADC file with webmasters.readonly and
-      # analytics.readonly — see ~/Websites/home/docs/search-and-analytics.md). Skipped without it,
+      # analytics.readonly — see ~/IdeaProjects/home/docs/search-and-analytics.md). Skipped without it,
       # and a failure here never blocks the draft: the agent then runs exactly as before.
       - name: Search and analytics brief
         if: ${{ env.HAS_ADC == 'true' }}

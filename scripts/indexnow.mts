@@ -1,7 +1,7 @@
 /**
  * IndexNow submitter — one script, one workflow, the same shape in every sibling repo
  * (aisuru, avantconcepts, eddiebarretta, onspec, real-estate). Design and setup live in the umbrella
- * repo (~/Websites/home/docs/indexnow.md).
+ * repo (~/IdeaProjects/home/docs/indexnow.md).
  *
  * IndexNow tells Bing (and Yandex, Seznam, Naver) which URLs changed, so new and updated pages are
  * crawled in hours instead of waiting to be discovered. Bing's index feeds ChatGPT search and

@@ -5,7 +5,7 @@ one post per merged blog post and one per CLI/Action release. Instagram, TikTok 
 out of scope: the audience is engineers, and the content is a mechanism, not a mood.
 
 Everything mechanical is shared with the other brands and documented once:
-`~/Websites/home/docs/social-pipeline.md`. In this repo:
+`~/IdeaProjects/home/docs/social-pipeline.md`. In this repo:
 
 ```
 social/voice.md              caption voice — read before drafting

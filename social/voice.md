@@ -1,7 +1,7 @@
 # onspec — social caption voice
 
 Read this before writing any `post.json` caption. Blog voice (the long-form sibling):
-`content/voice.md`. Publishing mechanics: `~/Websites/home/docs/social-pipeline.md`.
+`content/voice.md`. Publishing mechanics: `~/IdeaProjects/home/docs/social-pipeline.md`.
 
 VOICE — how onspec posts read:
 - Written by an engineer who ships, for engineers who ship. Direct, specific, skeptical of hype,

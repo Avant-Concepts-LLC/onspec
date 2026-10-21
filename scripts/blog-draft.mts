@@ -1,7 +1,7 @@
 /**
  * Monthly blog draft agent — one script, one workflow, the same shape in every sibling repo
  * (aisuru, avantconcepts, eddiebarretta, onspec, real-estate). The shared architecture is
- * documented in the umbrella repo (~/Websites/home/docs/blog-pipeline.md); this repo's blog doc
+ * documented in the umbrella repo (~/IdeaProjects/home/docs/blog-pipeline.md); this repo's blog doc
  * covers where posts live and how to review a draft.
  *
  *   GitHub Actions (1st of the month) → this script → Claude (web search + structured output)

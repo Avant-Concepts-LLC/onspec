@@ -7,4 +7,4 @@ Do not hand-edit these files: change the source tokens and re-run
 
 Git-native spec verification. Terminal-dark palette; green/red/amber are SEMANTIC (met / unmet / uncertain), never decorative.
 
-15 tokens parsed. Pushed to Claude Design with the `DesignSync` tool; see `~/Websites/home/docs/claude-design-handoff.md`.
+15 tokens parsed. Pushed to Claude Design with the `DesignSync` tool; see `~/IdeaProjects/home/docs/claude-design-handoff.md`.

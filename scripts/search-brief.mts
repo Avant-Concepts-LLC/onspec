@@ -12,7 +12,7 @@
  * Auth: an `authorized_user` ADC file at $GOOGLE_APPLICATION_CREDENTIALS (default: gcloud's
  * application_default_credentials.json) carrying webmasters.readonly + analytics.readonly.
  * In GitHub Actions the workflow writes the GOOGLE_ADC_JSON secret to a temp file. Setup and
- * the property map: ~/Websites/home/docs/search-and-analytics.md.
+ * the property map: ~/IdeaProjects/home/docs/search-and-analytics.md.
  *
  * Only the block between the SITE ADAPTER markers differs between repos; everything else is
  * byte-identical in all five and kept in sync with docs/blog-pipeline/assemble.mjs.
