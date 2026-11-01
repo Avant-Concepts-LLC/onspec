@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WPP2D90B4G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WPP2D90B4G');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spec Files Get Schemas. Instruction Files Still Run on Trust — onspec</title>
+<meta name="description" content="Spec Kit hardened its spec schema in September 2026, Cursor gave agents more autonomy, and a new CLAUDE.md study found structure doesn't change compliance.">
+<link rel="canonical" href="https://onspec.sh/blog/spec-schemas-vs-instruction-files">
+<meta property="og:title" content="Spec Files Get Schemas. Instruction Files Still Run on Trust — onspec">
+<meta property="og:description" content="Spec Kit hardened its spec schema in September 2026, Cursor gave agents more autonomy, and a new CLAUDE.md study found structure doesn't change compliance.">
+<meta property="og:url" content="https://onspec.sh/blog/spec-schemas-vs-instruction-files">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Spec Files Get Schemas. Instruction Files Still Run on Trust","description":"Spec Kit hardened its spec schema in September 2026, Cursor gave agents more autonomy, and a new CLAUDE.md study found structure doesn't change compliance.","datePublished":"2026-11-01","dateModified":"2026-11-01","url":"https://onspec.sh/blog/spec-schemas-vs-instruction-files","mainEntityOfPage":"https://onspec.sh/blog/spec-schemas-vs-instruction-files","isPartOf":{"@id":"https://onspec.sh/blog"},"keywords":"spec-driven-development, claude-code, ai-coding-agents, conformance","author":{"@type":"Organization","name":"Avant Concepts","url":"https://www.avant-concepts.com/"},"publisher":{"@type":"Organization","name":"Avant Concepts","url":"https://www.avant-concepts.com/","logo":{"@type":"ImageObject","url":"https://www.avant-concepts.com/apple-touch-icon.png","width":180,"height":180}},"citation":[{"@type":"CreativeWork","name":"Spec Kit 1.0.5","url":"https://github.com/github/spec-kit/releases/tag/v1.0.5"},{"@type":"CreativeWork","name":"Changelog · Cursor","url":"https://cursor.com/changelog/page/2"},{"@type":"CreativeWork","name":"CLAUDE.md Best Practices: What the Evidence Supports (2026)","url":"https://www.alexdunlop.com/writing/claude-md-best-practices"},{"@type":"CreativeWork","name":"SWE-bench Verified Leaderboard and Methodology","url":"https://www.vals.ai/benchmarks/swebench"}]}</script>
+<style>
+  :root {
+    --bg: #0b0d10; --bg-raised: #11141a; --bg-panel: #0e1116; --line: #1e232c; --line-soft: #171b22;
+    --text: #e8ebef; --text-dim: #9aa3b0; --text-faint: #616a78; --accent: #3ecf8e; --accent-dim: #2a8f64;
+    --radius: 10px; --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--text); font-family: "Geist", -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  nav.top { position: sticky; top: 0; z-index: 40; height: 64px; border-bottom: 1px solid var(--line-soft); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm { color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 14px; transition: border-color .2s, background .2s; }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  article { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .eyebrow { font-family: "Geist Mono", monospace; font-size: 13px; color: var(--text-faint); }
+  h1 { font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.03em; font-weight: 700; margin-top: 10px; }
+  .lede { margin-top: 12px; color: var(--text-dim); font-size: 1.1rem; }
+  .meta { margin-top: 16px; font-size: 13.5px; color: var(--text-faint); display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--text-dim); }
+  .body { margin-top: 40px; }
+  .body h2 { font-size: 1.35rem; letter-spacing: -0.02em; font-weight: 700; margin-top: 48px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+  .body h3 { font-size: 1.05rem; font-weight: 600; margin-top: 30px; }
+  .body p { margin-top: 14px; color: var(--text-dim); }
+  .body p:first-child { color: var(--text); font-size: 1.08rem; }
+  .body strong { color: var(--text); }
+  .body ul, .body ol { margin: 12px 0 0 20px; color: var(--text-dim); }
+  .body li { margin-top: 6px; }
+  .body blockquote { margin-top: 20px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--text); font-size: 1.1rem; }
+  .body code { background: var(--bg-raised); border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text); }
+  .body pre { margin-top: 16px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; font-size: 12.8px; line-height: 1.7; overflow-x: auto; color: var(--text-dim); }
+  .body pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+  .body a { color: var(--accent); }
+  .sources { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+  .sources h2 { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); }
+  .sources ol { margin: 12px 0 0 0; list-style: none; font-size: 14px; }
+  .sources li { margin-top: 8px; color: var(--text-dim); }
+  .sources .n { color: var(--text-faint); margin-right: 8px; font-family: "Geist Mono", monospace; }
+  .sources a { color: var(--text); }
+  .sources a:hover { color: var(--accent); }
+  .cta { margin-top: 48px; padding: 20px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-raised); color: var(--text-dim); font-size: 15px; }
+  .cta a { color: var(--accent); }
+  .list { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .list h1 { margin-top: 10px; }
+  .post { display: block; padding: 22px 0; border-bottom: 1px solid var(--line-soft); }
+  .post:hover .post-title { color: var(--accent); }
+  .post-title { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; transition: color .15s; }
+  .post-desc { margin-top: 6px; color: var(--text-dim); }
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-faint); }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .foot-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ blog</span></a>
+    <div class="nav-links">
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <p class="eyebrow">blog / spec-schemas-vs-instruction-files</p>
+  <h1>Spec Files Get Schemas. Instruction Files Still Run on Trust</h1>
+  <p class="lede">GitHub Spec Kit is tightening validation on its own spec format while editors give agents more room to act unsupervised. The CLAUDE.md file most teams actually rely on to constrain an agent isn't checked by anything.</p>
+  <div class="meta"><time datetime="2026-11-01">Nov 1, 2026</time><span>·</span><span>4 min read</span><span class="tag">spec-driven-development</span><span class="tag">claude-code</span><span class="tag">ai-coding-agents</span><span class="tag">conformance</span></div>
+  <div class="body">
+<p>GitHub&#39;s Spec Kit shipped eleven patch releases in September 2026 alone, and several of them close gaps in its own file format: a malformed step configuration that used to pass silently now gets rejected before a task is ever generated, and task output now has to carry the field constraints a spec&#39;s data model actually declares [1]. That is a tool getting stricter about the files it reads. Most teams running coding agents are not writing in Spec Kit&#39;s schema, though. They are writing a CLAUDE.md, a rules file, or a system prompt, and nothing checks whether the agent read it, let alone did what it said.</p>
+<h2>The spec format is getting pickier</h2>
+<p>Spec Kit&#39;s v1.0.5 release, tagged September 8, 2026, rolled in fixes that are boring in the best way: reject a non-mapping step.yml instead of accepting it and failing somewhere downstream, require a &#39;steps&#39; body on while and do-while loops instead of letting an empty one slip through, and require that tasks generated from a spec carry the field constraints its data-model.md actually declares [1]. None of these fixes touch whether the generated code is correct. They touch whether the spec file is well-formed enough for the tool to act on at all. That is a lower bar than correctness, but until recently it was not enforced either. Each one closes a case where a spec could previously look valid to a human, get fed to the tool, and only break when something tried to act on it later.</p>
+<p>The pattern continued through the month. September was the first full month on the v1.0.x line, and the project used patch releases rather than feature drops to keep tightening the workflow engine, the extension catalog, and the cross-platform install path [1]. The direction is the same throughout: a spec stops being prose a human has to parse by eye and becomes a document a parser can reject.</p>
+<h2>Editors give agents more room, not more checks</h2>
+<p>Cursor moved the opposite direction in the same window. An August 17, 2026 changelog entry added steering: you can now send a running agent a follow-up message without stopping it, and the message waits for the next tool call instead of interrupting mid-action [2]. Ten days later, self-hosted workers got computer use on Linux and Mac, so an agent can drive a desktop session unattended [2]. Both changes expand what an agent does between the moments a human looks at the screen. Neither adds a check on whether what happened in that stretch matched any rule the team wrote down.</p>
+<h2>The file everyone actually relies on is not checked at all</h2>
+<p>CLAUDE.md is the closest thing most teams have to a project-specific spec for their coding agent, and a close read of it published October 28, 2026 found that the usual advice mostly fixes the wrong problem. Testing one checkable rule across 1,650 Claude Code runs, the piece found that CLAUDE.md length and layout did not change whether the rule was followed, and that the 200-line target in Anthropic&#39;s own docs describes auto-memory&#39;s MEMORY.md, not CLAUDE.md, which loads in full regardless of size [3]. Its sharpest line: &quot;A NEVER line in CLAUDE.md is a request&quot; [3]. Nothing in the pipeline turns that request into a check against what the model actually did.</p>
+<p>Benchmarks have converged on a different, narrower thing to check. As of September 1, 2026, the top model on SWE-bench Verified clears 97.00 percent under one standardized harness [4]. That number says a patch passed a hidden test suite. It says nothing about whether the agent that wrote it respected a team&#39;s own naming convention, touched a directory it was told to leave alone, or satisfied an acceptance criterion that exists in exactly one spec file in exactly one repo. No public benchmark could encode that, and no instruction file currently checks it either. A score on a shared benchmark and a verdict on a team&#39;s own spec are measuring different things, and treating the first as a proxy for the second is where drift gets missed.</p>
+<ul>
+<li>Spec Kit&#39;s workflow schema: validated when the spec is authored, before a task exists [1]</li>
+<li>SWE-bench Verified&#39;s hidden tests: validated after the patch lands, against a fixed public task, not a team&#39;s own rules [4]</li>
+<li>Cursor&#39;s steering and computer-use updates: expand what an agent does unattended, with no new check on whether it stayed in bounds [2]</li>
+<li>A CLAUDE.md line like &quot;tests must pass before committing&quot;: restated to the model every run, never verified against the diff [3]</li>
+</ul>
+<pre><code class="language-markdown">## Project rules
+- NEVER modify files under /infra without human review
+- All new endpoints need an integration test
+- Follow the existing error-handling pattern in src/errors.ts
+</code></pre>
+<p>onspec sits at the layer under the instruction file. It does not write the CLAUDE.md or the spec, and it is not a test runner. It reads an approved spec&#39;s acceptance criteria against the diff and the test results and returns a met, unmet, or uncertain verdict per criterion, so a line like &quot;never touch /infra&quot; stops being something the agent is asked to remember and becomes something CI checks.</p>
+
+  </div>
+  <section class="sources" aria-label="Sources"><h2>Sources</h2><ol><li id="src-1"><span class="n">[1]</span><a href="https://github.com/github/spec-kit/releases/tag/v1.0.5" rel="noopener nofollow" target="_blank">Spec Kit 1.0.5</a> <span>— GitHub (spec-kit), Sep 8, 2026</span></li><li id="src-2"><span class="n">[2]</span><a href="https://cursor.com/changelog/page/2" rel="noopener nofollow" target="_blank">Changelog · Cursor</a> <span>— Cursor, Aug 27, 2026</span></li><li id="src-3"><span class="n">[3]</span><a href="https://www.alexdunlop.com/writing/claude-md-best-practices" rel="noopener nofollow" target="_blank">CLAUDE.md Best Practices: What the Evidence Supports (2026)</a> <span>— alexdunlop.com, Oct 28, 2026</span></li><li id="src-4"><span class="n">[4]</span><a href="https://www.vals.ai/benchmarks/swebench" rel="noopener nofollow" target="_blank">SWE-bench Verified Leaderboard and Methodology</a> <span>— Vals AI, Sep 1, 2026</span></li></ol></section>
+  <div class="cta">Specs that refuse to drift: <a href="/docs">read the docs</a>, or <code>npm install -g onspec</code> and run <code>onspec lint</code> on a spec you already have.</div>
+</article>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">© 2026 <a href="https://www.avant-concepts.com/" style="color: inherit">Avant Concepts LLC</a></span>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a href="https://www.npmjs.com/package/onspec">npm</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
