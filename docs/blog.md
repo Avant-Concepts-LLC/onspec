@@ -55,7 +55,7 @@ Then `npm run build:blog` and commit both the markdown and the generated HTML.
 
 ## The monthly agent
 
-`npm run blog:draft` (or `.github/workflows/blog-draft.yml`, 1st of the month at 13:00 UTC).
+`npm run blog:draft` (or `.github/workflows/blog-draft.yml`, 1st of the month at 8am New York time).
 Architecture and the shared-script rules are in the umbrella repo's `docs/blog-pipeline.md`. What
 is specific here:
 
