@@ -149,4 +149,4 @@ The LLM only drafts. Everything that must be true is enforced deterministically 
 
 ## Status
 
-Weekend-scale MVP. Zero server-side state — everything derives from the repo. Roadmap: blast-radius tracing, autonomy policies (change-class → merge-gate mapping), and a verifier eval corpus.
+Stable 1.x on npm, with releases built and published from CI. onspec checks itself: the six specs in [`specs/`](specs/) govern this repo's own code, and the [onspec workflow](.github/workflows/onspec.yml) verifies every pull request against them. It keeps no server-side state; everything derives from the repo. Roadmap: blast-radius tracing, autonomy policies (change-class → merge-gate mapping), and a verifier eval corpus.
