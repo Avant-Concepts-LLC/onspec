@@ -195,7 +195,7 @@
     display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px;
     align-items: center;
   }
-  @media (max-width: 860px) { .hotfix-panel { grid-template-columns: 1fr; padding: 28px; } }
+  @media (max-width: 860px) { .hotfix-panel { grid-template-columns: minmax(0, 1fr); padding: 28px; } }
   .hotfix-panel h3 { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.3; font-weight: 650; }
   .hotfix-panel p { margin-top: 12px; color: var(--text-dim); font-size: 15.5px; }
   .hotfix-term { background: var(--bg); border: 1px solid var(--line-soft); border-radius: var(--radius-sm); }
@@ -250,7 +250,7 @@
   /* footer */
   footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
   .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
-  .foot-links { display: flex; gap: 24px; }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
   .foot-links a:hover { color: var(--text); }
 
   /* reveal */

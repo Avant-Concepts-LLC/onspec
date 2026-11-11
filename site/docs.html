@@ -119,6 +119,11 @@
     border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text);
     white-space: nowrap;
   }
+
+  /* On a phone a long code word may wrap (not with a cloned chip per piece: Chrome then
+     lets the copied padding stick out). Safari measured
+     path/to/test.file::test name past a 390px screen (2026-11-10). */
+  @media (max-width: 480px) { main code.i { white-space: normal; overflow-wrap: anywhere; } }
   pre.block {
     margin-top: 16px; background: var(--bg-panel); border: 1px solid var(--line);
     border-radius: var(--radius); padding: 18px 20px; font-size: 12.8px;
@@ -145,7 +150,7 @@
 
   footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
   .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
-  .foot-links { display: flex; gap: 24px; }
+  .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
   .foot-links a:hover { color: var(--text); }
 </style>
 <script type="application/ld+json">
