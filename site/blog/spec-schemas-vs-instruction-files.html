@@ -42,8 +42,8 @@
   .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
   .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
   .nav-links a:hover { color: var(--text); }
-  .nav-links .btn-npm { color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 14px; transition: border-color .2s, background .2s; }
-  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  .nav-links .btn-npm span { display: block; color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 14px; transition: border-color .2s, background .2s; }
+  .nav-links .btn-npm:hover span { border-color: var(--accent-dim); background: var(--bg-raised); }
   article { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
   .eyebrow { font-family: "Geist Mono", monospace; font-size: 13px; color: var(--text-faint); }
   h1 { font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.03em; font-weight: 700; margin-top: 10px; }
@@ -82,6 +82,36 @@
   .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-faint); }
   .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
   .foot-links a:hover { color: var(--text); }
+
+  /* Everything you can tap is at least 44px on a phone, drawn where it was (2026-11-11):
+     the extra is room the bar already had, or padding given back by negative margins.
+     npm keeps its small outlined look on the label inside the link. */
+  .wordmark { padding-block: 8.5px; } /* 27px of line and 17 of padding: 44px tall, the bar is 64 */
+  .nav-links a { display: flex; align-items: center; min-height: 44px; padding-inline: 8px; margin-inline: -8px; }
+  .foot-links { gap: 0 24px; margin-block: -11px; }
+  .foot-links a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding-inline: 8px; margin-inline: -8px; }
+  .foot .mono a { padding: 20px 0 6px; } /* more above than below: the links' first row sits close underneath on a phone */
+  .cta a { padding-block: 12.5px; } /* a link inside a line of words: the padding moves no line */
+
+  /* Below 720px the links fold into a menu, as on the docs page: the name and four links
+     do not fit across a small phone (the bar was 331px wide on a 320px screen, 2026-11-11). */
+  .nav-toggle { display: none; width: 44px; height: 44px; margin-right: -10px; align-items: center; justify-content: center; background: none; border: 0; color: var(--text); cursor: pointer; border-radius: var(--radius-sm); }
+  .nav-toggle:hover { background: var(--bg-raised); }
+  .nav-toggle span { position: relative; display: block; width: 18px; height: 2px; background: currentColor; transition: transform .2s, background .2s; }
+  .nav-toggle span::before, .nav-toggle span::after { content: ""; position: absolute; left: 0; width: 18px; height: 2px; background: currentColor; transition: transform .2s, top .2s; }
+  .nav-toggle span::before { top: -6px; }
+  .nav-toggle span::after { top: 6px; }
+  nav.menu-open .nav-toggle span { background: transparent; }
+  nav.menu-open .nav-toggle span::before { top: 0; transform: rotate(45deg); }
+  nav.menu-open .nav-toggle span::after { top: 0; transform: rotate(-45deg); }
+  @media (max-width: 720px) {
+    .nav-toggle { display: flex; }
+    .nav-links { display: none; position: absolute; left: 0; right: 0; top: 64px; flex-direction: column; align-items: stretch; gap: 0; padding: 8px 0 12px; font-size: 16px; background: var(--bg); border-bottom: 1px solid var(--line-soft); }
+    nav.menu-open .nav-links { display: flex; }
+    .nav-links a { display: block; min-height: 0; margin: 0; padding: 12px 24px; }
+    .nav-links .btn-npm { margin: 8px 24px 0; padding: 0; }
+    .nav-links .btn-npm span { padding: 10px 14px; text-align: center; }
+  }
 </style>
 </head>
 <body>
@@ -89,11 +119,12 @@
 <nav class="top">
   <div class="wrap nav-inner">
     <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ blog</span></a>
-    <div class="nav-links">
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links"><span></span></button>
+    <div class="nav-links" id="nav-links">
       <a href="/docs">Docs</a>
       <a href="/blog">Blog</a>
       <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
-      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec"><span>npm</span></a>
     </div>
   </div>
 </nav>
@@ -144,5 +175,20 @@
     </div>
   </div>
 </footer>
+<script>
+  (() => {
+    const nav = document.querySelector("nav");
+    const btn = nav.querySelector(".nav-toggle");
+    const set = (open) => {
+      nav.classList.toggle("menu-open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    };
+    btn.addEventListener("click", () => set(!nav.classList.contains("menu-open")));
+    nav.querySelectorAll(".nav-links a").forEach((a) => a.addEventListener("click", () => set(false)));
+    document.addEventListener("keydown", (e) => e.key === "Escape" && set(false));
+    document.addEventListener("click", (e) => { if (!nav.contains(e.target)) set(false); });
+  })();
+</script>
 </body>
 </html>

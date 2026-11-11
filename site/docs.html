@@ -152,6 +152,14 @@
   .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
   .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
   .foot-links a:hover { color: var(--text); }
+
+  /* Everything you can tap is at least 44px on a phone, drawn where it was (2026-11-11):
+     the extra is room the bar already had, or padding given back by negative margins. */
+  .wordmark { padding-block: 8.5px; } /* 27px of line and 17 of padding: 44px tall, the bar is 64 */
+  .nav-toggle { width: 44px; height: 44px; margin-right: -10px; }
+  .foot-links { gap: 0 24px; margin-block: -11px; }
+  .foot-links a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding-inline: 8px; margin-inline: -8px; }
+  .foot .mono a { padding: 20px 0 6px; } /* more above than below: the links' first row sits close underneath on a phone */
 </style>
 <script type="application/ld+json">
 {

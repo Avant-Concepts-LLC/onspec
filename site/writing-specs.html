@@ -138,6 +138,19 @@
   .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
   .foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
   .foot-links a:hover { color: var(--text); }
+
+  /* Everything you can tap is at least 44px on a phone, drawn where it was (2026-11-11):
+     the extra is room the bar already had, or padding given back by negative margins. */
+  .wordmark { padding-block: 8.5px; } /* 27px of line and 17 of padding: 44px tall, the bar is 64 */
+  .nav-toggle { width: 44px; height: 44px; margin-right: -10px; }
+  .foot-links { gap: 0 24px; margin-block: -11px; }
+  .foot-links a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding-inline: 8px; margin-inline: -8px; }
+  .foot .mono a { padding: 20px 0 6px; } /* more above than below: the links' first row sits close underneath on a phone */
+  /* The copy button keeps its small outlined look on the label; the button around it is 44px tall. */
+  .prompt-head button { border: 0; padding: 9px 0; margin: -9px 0; background: none; }
+  .prompt-head button span { display: block; border: 1px solid var(--line); border-radius: 5px; padding: 4px 12px; line-height: normal; }
+  .prompt-head button:hover { border-color: transparent; }
+  .prompt-head button:hover span { border-color: var(--accent-dim); }
 </style>
 </head>
 <body>
@@ -164,7 +177,7 @@
   <h2>The prompt</h2>
   <p>Paste this into Claude, ChatGPT, or any assistant, then add your feature description at the bottom.</p>
 
-  <div class="prompt-head"><span>spec drafting prompt</span><button id="copy-prompt">copy</button></div>
+  <div class="prompt-head"><span>spec drafting prompt</span><button id="copy-prompt"><span>copy</span></button></div>
   <pre class="block" id="prompt-text">You are helping me draft a spec for onspec (onspec.sh): a markdown file with YAML frontmatter defining acceptance criteria for a software feature. My team will review it in a pull request, and it will then be verified automatically against the code, so every criterion must be a single, concretely checkable behavior.
 
 Rules:
@@ -220,7 +233,7 @@ My feature description:
 
 <script>
   document.getElementById("copy-prompt").addEventListener("click", async () => {
-    const btn = document.getElementById("copy-prompt");
+    const btn = document.getElementById("copy-prompt").querySelector("span");
     try {
       await navigator.clipboard.writeText(document.getElementById("prompt-text").textContent);
       btn.textContent = "copied";
