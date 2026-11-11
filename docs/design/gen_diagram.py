@@ -5,7 +5,7 @@ import html, os
 
 W, H = 1600, 920
 INK, GROUND, MUTED = "#e8ebef", "#0b0d10", "#9aa3b0"
-PANEL, LINE, FAINT = "#0e1116", "#1e232c", "#616a78"
+PANEL, LINE, FAINT = "#0e1116", "#1e232c", "#77808e"  # FAINT was #616a78: 3.4:1 on the panels; 4.6:1 now (2026-11-10)
 GREEN, GREEN_BG = "#3ecf8e", "#0f2a1f"
 AMBER, AMBER_BG = "#d9a441", "#2a2210"
 RED, RED_BG = "#f0716c", "#2a1513"
@@ -95,7 +95,7 @@ A(kicker(sx + 16, sy + 14, sw - 32, "1 · The spec · a file in the repo", GREEN
 A(mono(sx + 16, sy + 34, sw - 32, "specs/csv-export.spec.md", 11, MUTED))
 frontmatter = [("id", "SPEC-0042", MUTED), ("status", "approved", GREEN), ("refs", "PROJ-123", MUTED), ("covers", "src/export/**", INK), ("criteria", "", MUTED), ("  C1", "verify: test", GREEN), ("", "tests/export.test.ts::archived", FAINT), ("  C2", "verify: assertion", GREEN), ("", "src/export/csv.ts#FORMAT = \"RFC4180\"", FAINT), ("  C3", "verify: manual", AMBER), ("invariants", "RFC 4180 stays", MUTED), ("non_goals", "bulk archive", MUTED)]
 A(card(sx + 16, sy + 54, sw - 32, 232, LINE, GROUND, inner='<div style="padding:10px 12px; display:flex; flex-direction:column; gap:2px; ' + MONO + ' font-size:10.5px; line-height:1.5;">' + "".join(f'<div style="display:flex; gap:8px;"><span style="color:{FAINT}; min-width:64px;">{k}</span><span style="color:{c};">{v}</span></div>' for k, v, c in frontmatter) + '</div>'))
-A(f'<div style="position:absolute; left:{sx+16}px; top:{sy+296}px; width:{sw-32}px; display:flex; gap:6px; flex-wrap:wrap;">' + pill("draft", FAINT) + '<span style="color:#616a78; font-size:11px; line-height:22px;">→</span>' + pill("approved", GREEN) + '<span style="color:#616a78; font-size:11px; line-height:22px;">→</span>' + pill("superseded", RED) + "</div>\n")
+A(f'<div style="position:absolute; left:{sx+16}px; top:{sy+296}px; width:{sw-32}px; display:flex; gap:6px; flex-wrap:wrap;">' + pill("draft", FAINT) + '<span style="color:' + FAINT + '; font-size:11px; line-height:22px;">→</span>' + pill("approved", GREEN) + '<span style="color:' + FAINT + '; font-size:11px; line-height:22px;">→</span>' + pill("superseded", RED) + "</div>\n")
 A(text(sx + 16, sy + 326, sw - 32, "Approval is a human act in a reviewed PR. Versioned and diffed like code.", 10.5, 400, MUTED))
 A(card(sx + 16, sy + 364, sw - 32, 90, LINE, GROUND, inner=f'<div style="padding:8px 10px; display:flex; flex-direction:column; gap:4px;"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:11.5px; font-weight:600;"><span style="{MONO} color:{GREEN};">onspec lint</span> · readiness grade</span><span style="{MONO} font-size:11px; color:{GREEN};">A B C D F</span></div><div style="font-size:10px; color:{MUTED}; line-height:1.4;">manual criterion −10 · missing evidence · vague wording −3 per word · dead cover globs. A = no penalty, F above 45.</div></div>'))
 

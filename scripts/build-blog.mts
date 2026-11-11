@@ -66,7 +66,7 @@ export function loadPosts(): BlogPost[] {
 const STYLE = `
   :root {
     --bg: #0b0d10; --bg-raised: #11141a; --bg-panel: #0e1116; --line: #1e232c; --line-soft: #171b22;
-    --text: #e8ebef; --text-dim: #9aa3b0; --text-faint: #616a78; --accent: #3ecf8e; --accent-dim: #2a8f64;
+    --text: #e8ebef; --text-dim: #9aa3b0; --text-faint: #77808e; /* was #616a78: 3.4:1 on the panels; this is 4.6:1 (2026-11-10) */ --accent: #3ecf8e; --accent-dim: #2a8f64;
     --radius: 10px; --radius-sm: 7px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
