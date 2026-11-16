@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WPP2D90B4G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-WPP2D90B4G');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spec conformance report, done for you | onspec</title>
+<meta name="description" content="Send the spec and the repo. Get every requirement back as met, unmet or uncertain, with the evidence. One repository, fixed price, five business days.">
+<link rel="canonical" href="https://onspec.sh/report">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://onspec.sh/report">
+<meta property="og:title" content="Did the code do what the spec asked?">
+<meta property="og:description" content="A spec conformance report, done for you: every requirement met, unmet or uncertain, with the evidence. Fixed price.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-raised: #11141a;
+    --bg-panel: #0e1116;
+    --line: #1e232c;
+    --line-soft: #171b22;
+    --text: #e8ebef;
+    --text-dim: #9aa3b0;
+    --text-faint: #77808e;
+    --accent: #3ecf8e;
+    --accent-dim: #2a8f64;
+    --met: #3ecf8e;
+    --unmet: #f0716c;
+    --uncertain: #d9a441;
+    --radius: 10px;
+    --radius-sm: 7px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Geist", -apple-system, "Segoe UI", sans-serif;
+    font-size: 15.5px; line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  nav.top {
+    position: sticky; top: 0; z-index: 40; height: 64px;
+    border-bottom: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .nav-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .wordmark .tick { color: var(--accent); }
+  .wordmark .crumb { color: var(--text-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links .btn-npm {
+    color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 6px 14px; transition: border-color .2s, background .2s;
+  }
+  .nav-links .btn-npm:hover { border-color: var(--accent-dim); background: var(--bg-raised); }
+  .nav-toggle {
+    display: none; width: 44px; height: 44px; margin-right: -10px;
+    align-items: center; justify-content: center;
+    background: none; border: 0; color: var(--text); cursor: pointer; border-radius: var(--radius-sm);
+  }
+  .nav-toggle:hover { background: var(--bg-raised); }
+  .nav-toggle span { position: relative; display: block; width: 18px; height: 2px; background: currentColor; transition: transform .2s, background .2s; }
+  .nav-toggle span::before, .nav-toggle span::after {
+    content: ""; position: absolute; left: 0; width: 18px; height: 2px; background: currentColor; transition: transform .2s, top .2s;
+  }
+  .nav-toggle span::before { top: -6px; }
+  .nav-toggle span::after { top: 6px; }
+  nav.menu-open .nav-toggle span { background: transparent; }
+  nav.menu-open .nav-toggle span::before { top: 0; transform: rotate(45deg); }
+  nav.menu-open .nav-toggle span::after { top: 0; transform: rotate(-45deg); }
+  @media (max-width: 720px) {
+    .nav-toggle { display: flex; }
+    .nav-links {
+      display: none; position: absolute; left: 0; right: 0; top: 64px;
+      flex-direction: column; align-items: stretch; gap: 0;
+      padding: 8px 0 12px; font-size: 16px;
+      background: var(--bg); border-bottom: 1px solid var(--line-soft);
+    }
+    nav.menu-open .nav-links { display: flex; }
+    .nav-links a { display: block; padding: 12px 24px; }
+    .nav-links .btn-npm { margin: 8px 24px 0; padding: 10px 14px; text-align: center; }
+  }
+
+  article { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+  .kicker { font-family: "Geist Mono", monospace; font-size: 12.5px; color: var(--accent); letter-spacing: 0.02em; }
+  h1 { margin-top: 14px; font-size: clamp(2.1rem, 5.4vw, 3rem); line-height: 1.08; letter-spacing: -0.035em; font-weight: 700; }
+  .lede { margin-top: 18px; color: var(--text-dim); font-size: 1.1rem; max-width: 56ch; }
+  .lede strong { color: var(--text); font-weight: 500; }
+  h2 { font-size: 1.35rem; letter-spacing: -0.02em; font-weight: 700; margin-top: 64px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+  h3 { font-size: 1rem; font-weight: 600; margin-top: 26px; color: var(--text); }
+  p { margin-top: 14px; color: var(--text-dim); }
+  p strong { color: var(--text); }
+  h3 + p { margin-top: 6px; }
+  ol, ul { margin: 14px 0 0 22px; color: var(--text-dim); }
+  li { margin-top: 8px; }
+  li strong { color: var(--text); }
+  a.link { color: var(--accent); }
+  a.link:hover { text-decoration: underline; }
+  code.i {
+    background: var(--bg-raised); border: 1px solid var(--line-soft);
+    border-radius: 5px; padding: 1px 6px; font-size: 13px; color: var(--text);
+  }
+  @media (max-width: 480px) { code.i { white-space: normal; overflow-wrap: anywhere; } }
+
+  /* ---------- the offer ---------- */
+  .offer {
+    margin-top: 36px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius);
+  }
+  .offer > div { padding: 26px 28px; }
+  .offer .terms { border-left: 1px solid var(--line-soft); }
+  .price { font-family: "Geist Mono", monospace; font-weight: 600; font-size: 2.7rem; line-height: 1; letter-spacing: -0.04em; }
+  .price-note { margin-top: 10px; font-size: 14px; color: var(--text-dim); }
+  .offer ul { list-style: none; margin: 0; font-size: 14.5px; }
+  .offer li { margin-top: 0; padding: 7px 0 7px 24px; position: relative; }
+  .offer li + li { border-top: 1px solid var(--line-soft); }
+  .offer li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-family: "Geist Mono", monospace; font-size: 13px; }
+  .cta {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 46px;
+    margin-top: 22px; padding: 11px 22px; border-radius: var(--radius-sm);
+    background: var(--accent); color: #06140d; font-weight: 600; font-size: 15px;
+    transition: background .15s;
+  }
+  .cta:hover { background: #5fdca3; }
+  .cta-note { margin-top: 12px; font-size: 13px; color: var(--text-faint); }
+  @media (max-width: 640px) {
+    .offer { grid-template-columns: minmax(0, 1fr); }
+    .offer .terms { border-left: 0; border-top: 1px solid var(--line-soft); }
+    .cta { width: 100%; }
+  }
+
+  /* ---------- the sample ---------- */
+  .term {
+    margin-top: 18px; background: var(--bg-panel); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .term-bar {
+    padding: 9px 16px; border-bottom: 1px solid var(--line-soft);
+    font-family: "Geist Mono", monospace; font-size: 12px; color: var(--text-faint);
+  }
+  .term pre { padding: 18px 20px; font-size: 12.6px; line-height: 1.75; overflow-x: auto; color: var(--text-dim); }
+  .t-spec { color: var(--text); font-weight: 600; }
+  .t-met { color: var(--met); }
+  .t-unmet { color: var(--unmet); }
+  .t-unc { color: var(--uncertain); }
+  .t-dim { color: var(--text-faint); }
+  .t-sum { color: var(--text); font-weight: 600; }
+
+  .not li::marker { color: var(--unmet); }
+  .closing { margin-top: 64px; padding: 30px 28px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius); }
+  .closing h2 { margin-top: 0; border: 0; padding: 0; }
+  .closing .cta { margin-top: 20px; }
+
+  footer { border-top: 1px solid var(--line-soft); padding: 40px 0 56px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-faint); font-size: 14px; }
+  .foot-links { display: flex; gap: 0 24px; flex-wrap: wrap; margin-block: -11px; }
+  .foot-links a:hover { color: var(--text); }
+
+  /* Everything you can tap is at least 44px on a phone (the site's rule since 2026-11-11). */
+  .wordmark { padding-block: 8.5px; }
+  .foot-links a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding-inline: 8px; margin-inline: -8px; }
+  .foot .mono a { padding: 20px 0 6px; }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="/"><span class="tick">✓</span> onspec <span class="crumb">/ report</span></a>
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links"><span></span></button>
+    <div class="nav-links" id="nav-links">
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+      <a class="btn-npm" href="https://www.npmjs.com/package/onspec">npm</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+  <p class="kicker">spec conformance report · done for you</p>
+  <h1>Did the code do what the spec asked?</h1>
+  <p class="lede">Send the spec and the repo. You get every requirement back as <strong>met</strong>, <strong>unmet</strong> or <strong>uncertain</strong>, each with the test or the file and line behind it. One person runs it and signs it. Fixed price.</p>
+
+  <div class="offer">
+    <div>
+      <div class="price">$500</div>
+      <p class="price-note">One repository, one spec, up to 25 requirements.</p>
+      <a class="cta" data-cta="top" href="mailto:contact@avant-concepts.com?subject=Spec%20conformance%20report&amp;body=Repository%20(language%2C%20rough%20size)%3A%0A%0AWhere%20the%20spec%20lives%20(PRD%2C%20tickets%2C%20statement%20of%20work%2C%20the%20prompt)%3A%0A%0ARoughly%20how%20many%20requirements%3A%0A%0ATests%20(yes%20or%20no%2C%20which%20runner)%3A%0A%0AWhen%20you%20need%20it%3A%0A">Request a report</a>
+      <p class="cta-note">A yes or no within one business day. You pay nothing until then.</p>
+    </div>
+    <div class="terms">
+      <ul>
+        <li>A verdict and its evidence for every requirement</li>
+        <li>The requirements that cannot be checked as written, each with a rewrite</li>
+        <li>The code that no requirement asked for</li>
+        <li>The spec as onspec files, ready to run in your CI</li>
+        <li>Delivered within five business days</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>What comes back</h2>
+  <p>A written report, in PDF and Markdown. Its core looks like this.</p>
+  <div class="term">
+    <div class="term-bar">sample report · an invented repository</div>
+    <pre><span class="t-dim">Source: "Invoice export" PRD · 18 requirements · commit 4f2c1e9</span>
+
+<span class="t-spec">SPEC-0001</span>  Invoice export
+  <span class="t-met">✓ met</span>        C3   Archived invoices are exported when include_archived=true
+               <span class="t-dim">test passed: includes archived invoices</span>
+  <span class="t-unmet">✗ unmet</span>      C7   Amounts round half-even to two decimals
+               <span class="t-dim">src/export/format.ts:41 rounds half-up; no test covers rounding</span>
+  <span class="t-unc">? uncertain</span>  C11  Exporting 50,000 rows completes without error
+               <span class="t-dim">no test runs at this size; a load test would decide it</span>
+
+<span class="t-spec">Not checkable as written</span>
+  C14  "Export should be fast"
+       <span class="t-dim">no pass or fail behavior stated; rewrite proposed</span>
+
+<span class="t-spec">Code no requirement covers</span>
+  <span class="t-unc">⚠</span> src/admin/bulk-delete.ts
+       <span class="t-dim">added in this work; nothing in the spec asks for it</span>
+
+<span class="t-sum">Summary: 12 met · 3 unmet · 2 uncertain · 1 not checkable (18 requirements)</span></pre>
+  </div>
+  <ul>
+    <li><strong>Every met or unmet cites its evidence:</strong> a test that passed or failed, or a file and line. A verdict that cannot be backed is reported as uncertain. Nothing is guessed.</li>
+    <li><strong>Vague requirements are a finding.</strong> "Should be fast" cannot pass or fail. The report lists each one with a rewrite that can.</li>
+    <li><strong>You keep the check.</strong> Your spec comes back as onspec files with the CI step, so the same verdicts run on every pull request afterwards. The tool is free and MIT licensed.</li>
+  </ul>
+
+  <h2>What you send</h2>
+  <ol>
+    <li><strong>The spec, in whatever form it exists:</strong> a PRD, a set of tickets, a statement of work, or the prompt you gave the agent.</li>
+    <li><strong>Read-only access to the repository,</strong> or a zip of it.</li>
+    <li><strong>The test results your CI already writes</strong> (JUnit XML), or the command that runs your tests. No tests is fine. It changes what counts as evidence, and the report says so.</li>
+  </ol>
+
+  <h2>What it is not</h2>
+  <ul class="not">
+    <li>Not a security audit or a penetration test.</li>
+    <li>Not a review of code quality, performance or architecture.</li>
+    <li>Not a guarantee that the software is right for your business. It answers one question: does the code do what this document says?</li>
+  </ul>
+
+  <h2>How it goes</h2>
+  <ol>
+    <li><strong>You email the request:</strong> the language and rough size of the repo, where the spec lives, about how many requirements, and when you need it.</li>
+    <li><strong>You get a yes or no within one business day.</strong> A spec with more than 25 requirements, or more than one repository, gets a fixed quote instead.</li>
+    <li><strong>You get an invoice.</strong> Work starts when it is paid and access is given.</li>
+    <li><strong>The report arrives within five business days.</strong> One round of questions about it is included. If it is late, you get your money back.</li>
+  </ol>
+
+  <h2>Who runs it</h2>
+  <p>Ben Subercaseaux, who wrote onspec, at <a class="link" href="https://www.avant-concepts.com/">Avant Concepts LLC</a>. One person reads your spec and your code and signs the report. That also means a few reports a month, first come, first served.</p>
+
+  <h2>Your code</h2>
+  <ul>
+    <li>Access is read-only and ends when the report is delivered. Local copies are deleted then.</li>
+    <li>Where a requirement has no test behind it, the relevant code and the requirement's text go to the Anthropic API so a model can assess it. Every verdict reached that way is checked against the code by hand before it goes in the report.</li>
+    <li>If no code may go to a model, say so. Those requirements are read by hand instead.</li>
+    <li>An NDA on request, signed before access.</li>
+  </ul>
+
+  <h2>Questions</h2>
+  <h3>Can I run this myself?</h3>
+  <p>Yes. <code class="i">npm install -g onspec</code>, and the <a class="link" href="/docs">docs</a> cover the rest. The report is for when you want it done this week, or want the check made by someone who is neither the author of the code nor the agent that wrote it.</p>
+  <h3>My spec is a mess.</h3>
+  <p>Most are. Turning it into requirements that can pass or fail is part of the work, and you keep the result.</p>
+  <h3>Which languages?</h3>
+  <p>Any. Test evidence comes through JUnit XML, which nearly every test runner can write. The rest is read from the code.</p>
+  <h3>What if nothing is unmet?</h3>
+  <p>Then you have that in writing, with the evidence, and the spec files that keep it true.</p>
+
+  <div class="closing">
+    <h2>One spec, one repo, $500.</h2>
+    <p>Email <a class="link" href="mailto:contact@avant-concepts.com?subject=Spec%20conformance%20report">contact@avant-concepts.com</a> with the repo's language and size, where the spec lives, and when you need it.</p>
+    <a class="cta" data-cta="bottom" href="mailto:contact@avant-concepts.com?subject=Spec%20conformance%20report&amp;body=Repository%20(language%2C%20rough%20size)%3A%0A%0AWhere%20the%20spec%20lives%20(PRD%2C%20tickets%2C%20statement%20of%20work%2C%20the%20prompt)%3A%0A%0ARoughly%20how%20many%20requirements%3A%0A%0ATests%20(yes%20or%20no%2C%20which%20runner)%3A%0A%0AWhen%20you%20need%20it%3A%0A">Request a report</a>
+  </div>
+</article>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">© 2026 <a href="https://www.avant-concepts.com/" style="color: inherit">Avant Concepts LLC</a></span>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/blog">Blog</a>
+      <a href="https://github.com/Avant-Concepts-LLC/onspec">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (() => {
+    const nav = document.querySelector("nav");
+    const btn = nav.querySelector(".nav-toggle");
+    const set = (open) => {
+      nav.classList.toggle("menu-open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    };
+    btn.addEventListener("click", () => set(!nav.classList.contains("menu-open")));
+    nav.querySelectorAll(".nav-links a").forEach((a) => a.addEventListener("click", () => set(false)));
+    document.addEventListener("keydown", (e) => e.key === "Escape" && set(false));
+    document.addEventListener("click", (e) => { if (!nav.contains(e.target)) set(false); });
+  })();
+  // One event per press of "Request a report", so page views can be set beside requests started.
+  document.querySelectorAll("a.cta").forEach((a) => a.addEventListener("click", () => {
+    if (typeof gtag === "function") gtag("event", "report_request_click", { position: a.dataset.cta });
+  }));
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

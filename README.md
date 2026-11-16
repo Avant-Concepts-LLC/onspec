@@ -10,6 +10,8 @@ Everyone builds the front half of spec-driven development: spec → generated co
 - **Every change is checked against its governing spec** — each acceptance criterion gets a met / unmet / uncertain verdict with evidence.
 - **Drift is refused, not documented** — hand-edits that no spec governs get flagged: write the spec or revert the code.
 
+**Want it run for you?** A fixed-price [spec conformance report](https://onspec.sh/report): send the spec and the repo, and get every requirement back as met, unmet or uncertain, with the evidence.
+
 ## Quick start
 
 ```bash
