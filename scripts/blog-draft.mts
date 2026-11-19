@@ -220,13 +220,14 @@ function writePost(draft: Draft, today: string, words: number): string[] {
 // ───────────────────────────── Shared: pipeline ─────────────────────────────
 
 function parseArgs(argv: string[]) {
-  const out = { dryRun: false, lookback: 0, fromDraft: "", demand: "" };
+  const out = { dryRun: false, lookback: 0, fromDraft: "", demand: "", stylePass: true };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--dry-run") out.dryRun = true;
     else if (a === "--lookback") out.lookback = parseInt(argv[++i] ?? "", 10);
     else if (a === "--from-draft") out.fromDraft = argv[++i] ?? "";
     else if (a === "--demand") out.demand = argv[++i] ?? "";
+    else if (a === "--no-style-pass") out.stylePass = false;
     else throw new Error(`Unknown argument: ${a}`);
   }
   return out;
@@ -237,6 +238,111 @@ const readingTime = (words: number) => `${Math.max(1, Math.round(words / 220))} 
 const countWords = (s: string) => s.split(/\s+/).filter(Boolean).length;
 const allText = (d: Draft) => d.blocks.map((b) => (b.type === "list" ? b.items.join(" ") : b.type === "code" ? "" : b.text)).join(" ");
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").split("-").slice(0, 6).join("-");
+
+// ───────────────────────────── Shared: plain writing ─────────────────────────────
+//
+// The patterns that make a post read as machine-written, from the humanizer skill
+// (github.com/blader/humanizer, after Wikipedia's "Signs of AI writing"), strongest first.
+// Added 2026-11-19 after the November posts kept them: the avantconcepts post had eight
+// "actually"s, two "is not X. It is Y." pairs and a "bottom line" section restating itself.
+// They go three places: the drafting prompt, a lint that lists what survived, and one short
+// editing pass when the lint finds anything (reviseForPlainWriting, below).
+
+const PLAIN_WRITING = `PLAIN WRITING (these read as machine-written; a careful human writer almost never uses them, so don't):
+- No staged contrasts: "not X but Y", "not just X, it's Y", "X rather than Y", or the split form "This is not X. It is Y." Say what the thing is. Keep a contrast only when the reader really believes the X half.
+- No one-line closers that restate the paragraph ("That gap matters.", "That is the real win.", "The message was clear."), and no rows of fragments for drama.
+- No sayings that sound deep: "the real question", "at its core", "what really matters", "the heart of the matter", "X is the language of Y".
+- No run-ups before the point: "here's the thing", "let's dive in", "here's what you need to know", "the part that matters is". Make the point.
+- No answering objections nobody raised ("To be clear", "This isn't to say", "You might think").
+- No forced threes: list three things only when there are three.
+- No inflated significance: "pivotal", "a testament to", "marks a shift", "the evolving landscape", "setting the stage", "the future looks bright". Keep the fact, drop the dressing. End on the last concrete fact or the next step, never on a "bottom line" or "takeaways" section that repeats the post.
+- Avoid these words: delve, crucial, pivotal, landscape (as an abstract noun), underscore, showcase, testament, tapestry, vibrant, meticulous, intricate, interplay, garner, enduring, seamless, additionally, "moving the needle", "game-changer". Use "actually" at most once in the whole post.
+- At most one em dash in the whole post. Don't run an aside or a list into a sentence between commas instead; give it its own sentence, or use a colon.
+- Use is, are and has, not "serves as", "stands as", "boasts", "features".`;
+
+/** One finding per pattern that survived, with a short quote, for the run summary and the editing pass. */
+function plainWritingLint(draft: Draft): string[] {
+  const prose = draft.blocks.filter((b) => b.type !== "code");
+  const text = prose.map((b) => (b.type === "list" ? b.items.join(" ") : b.text)).join("\n").replace(/\[cite:[a-z0-9-]+\]/g, "");
+  const found: string[] = [];
+  const quote = (m: string) => `"${m.trim().replace(/\s+/g, " ").slice(0, 90)}"`;
+  const each = (label: string, re: RegExp) => {
+    for (const m of text.matchAll(re)) found.push(`${label}: ${quote(m[0])}`);
+  };
+  each("Staged contrast", /\bnot (?:just|only|merely|simply)\b[^.!?]{0,120}?\bbut\b[^.!?]{0,40}/gi);
+  each("Staged contrast", /\b(?:it'?s|this is|that'?s|it is) not [^.!?;]{1,80}[,;] (?:it'?s|it is|but)\b[^.!?]{0,40}/gi);
+  each("Staged contrast (split)", /[^.!?]*\b(?:is not|isn't|are not|aren't|was not|wasn't)\b[^.!?]{0,100}[.!?]\s+(?:It|They|This)(?:'s| is| are| was)\b[^.!?]{0,60}/g);
+  each("Run-up or deep saying", /\b(?:here'?s the thing|let'?s dive|here'?s what you need to know|the real question|at its core|what really matters|the heart of the matter|the part that matters|to be clear|this isn'?t to say|in today'?s|the bottom line|key takeaways?|in conclusion|the future looks bright|moving the needle|game[- ]changer)\b[^.!?]{0,50}/gi);
+  each("Closer that restates", /(?:^|[.!?]\s+)(?:That|This) (?:gap |distinction |difference |shift )?(?:matters|is the real \w+)[^.!?]{0,40}[.!?]/g);
+  each("Stock word", /\b(?:delve[sd]?|crucial|pivotal|landscape|underscor(?:e|es|ed|ing)|showcas(?:e|es|ed|ing)|testament|tapestry|vibrant|meticulous(?:ly)?|intricate|interplay|garner(?:s|ed)?|enduring|seamless(?:ly)?|additionally)\b/gi);
+  for (const b of draft.blocks) {
+    if (b.type === "h2" && /\b(?:bottom line|conclusion|final thoughts|takeaways?|wrapping up)\b/i.test(b.text)) found.push(`Restating section: ${quote(b.text)}`);
+    if (b.type === "h2" && /, not \w+/i.test(b.text)) found.push(`Staged contrast in a heading: ${quote(b.text)}`);
+  }
+  const actually = (text.match(/\bactually\b/gi) ?? []).length;
+  if (actually > 1) found.push(`"actually" ${actually} times (at most once)`);
+  const dashes = (text.match(/[—–]/g) ?? []).length;
+  if (dashes > 1) found.push(`${dashes} em or en dashes (at most one)`);
+  return [...new Set(found)];
+}
+
+/**
+ * One short editing pass over the blocks when the lint finds anything. The editor may change
+ * wording only: if a block's citation markers, the post's numbers or the block structure come
+ * back different, or the post shrinks by more than a sixth, the original stands and the summary
+ * says why. Returns the notes for the run summary.
+ */
+async function reviseForPlainWriting(draft: Draft, model: string): Promise<string[]> {
+  const before = plainWritingLint(draft);
+  if (!before.length) return [];
+  if (!process.env.ANTHROPIC_API_KEY) return [`Plain writing: ${before.length} finding(s), no editing pass (no ANTHROPIC_API_KEY): ${before.join("; ")}`];
+  const client = new Anthropic({ timeout: REQUEST_TIMEOUT_MS, maxRetries: 1 });
+  const prompt = `You are the copy editor for a blog post on ${SITE.name}. Edit the prose so it reads like a careful human writer, without changing what it says.
+
+${PLAIN_WRITING}
+
+What a check found in this draft:
+${before.map((f) => `- ${f}`).join("\n")}
+
+Rules for this edit:
+- Fix the findings above, and anything else in PLAIN WRITING you notice. Leave sentences that are already plain alone.
+- Keep every fact, name, number, date and quote. Keep every [cite:id] marker, in the same block, right after the claim it supports.
+- Return the same blocks, the same number of them, in the same order, with the same "type" each. Edit only "text" (and "items" for list blocks). Leave code blocks exactly as they are.
+- Keep the length within about a tenth of the original.
+
+THE BLOCKS (JSON):
+${JSON.stringify(draft.blocks)}
+
+Return {"blocks": [...]} and nothing else.`;
+  try {
+    const message = await client.messages.create({
+      model,
+      max_tokens: 16000,
+      output_config: { format: { type: "json_schema", schema: { type: "object", additionalProperties: false, required: ["blocks"], properties: { blocks: DRAFT_SCHEMA.properties.blocks } } } },
+      messages: [{ role: "user", content: prompt }],
+    });
+    const raw = message.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("");
+    const blocks = (JSON.parse(raw) as { blocks: DraftBlock[] }).blocks;
+    const t = message.usage;
+    console.error(`[blog-draft] plain-writing pass: ${t.input_tokens} in / ${t.output_tokens} out`);
+    const cites = (b: DraftBlock) => [...(b.text + " " + b.items.join(" ")).matchAll(/\[cite:([a-z0-9-]+)\]/g)].map((m) => m[1]).sort().join(",");
+    const numbers = (bs: DraftBlock[]) => bs.flatMap((b) => [...(b.text + " " + b.items.join(" ")).replace(/\[cite:[a-z0-9-]+\]/g, "").matchAll(/\d[\d,.]*%?/g)].map((m) => m[0].replace(/[.,]$/, ""))).sort().join(" ");
+    const words = (bs: DraftBlock[]) => countWords(allText({ ...draft, blocks: bs }));
+    let why = "";
+    if (!Array.isArray(blocks) || blocks.length !== draft.blocks.length) why = `it returned ${blocks?.length ?? 0} blocks for ${draft.blocks.length}`;
+    else if (blocks.some((b, i) => b.type !== draft.blocks[i].type)) why = "it changed a block's type";
+    else if (blocks.some((b, i) => b.type === "code" && (b.text !== draft.blocks[i].text))) why = "it changed a code block";
+    else if (blocks.some((b, i) => cites(b) !== cites(draft.blocks[i]))) why = "it moved or dropped a citation";
+    else if (numbers(blocks) !== numbers(draft.blocks)) why = "it changed a number";
+    else if (words(blocks) < words(draft.blocks) * 0.83 || words(blocks) < 600) why = `it cut the post from ${words(draft.blocks)} to ${words(blocks)} words`;
+    if (why) return [`Plain writing: editing pass discarded because ${why}; ${before.length} finding(s) remain: ${before.join("; ")}`];
+    draft.blocks = blocks.map((b) => ({ type: b.type, text: b.text ?? "", items: Array.isArray(b.items) ? b.items : [] }));
+    const after = plainWritingLint(draft);
+    return [`Plain writing: editing pass fixed ${before.length - Math.min(after.length, before.length)} of ${before.length} finding(s)${after.length ? `; still there: ${after.join("; ")}` : ""}`];
+  } catch (err) {
+    return [`Plain writing: editing pass failed (${err instanceof Error ? err.message : String(err)}); ${before.length} finding(s) remain: ${before.join("; ")}`];
+  }
+}
 
 function buildPrompt(opts: { existing: { title: string; date: string }[]; today: string; cutoff: string; lookbackDays: number; demand: string }) {
   const allows = (t: BlockType) => SITE.blockTypes.includes(t);
@@ -275,7 +381,10 @@ ${SITE.writing}
 - Citations: place a marker like [cite:source-id] immediately after the claim it supports. Every marker's id must exist in "sources". Cite generously: every number and every industry fact gets a marker.
 - "sources": "id" is a short kebab-case handle; "date" is the source's publication date as YYYY-MM-DD; "author" is null when unknown; "url" is the page you actually read.
 - "slug": kebab-case, 3-6 words. "description": under 160 characters. "dek": one or two sentences shown under the title. "tags": 2-4 short labels.
+- Before you return, reread every block against PLAIN WRITING below and fix what you find.
 - "demandNote": ${opts.demand ? "one or two plain sentences for the human reviewer: which item in READER DEMAND this topic answers, or, if you passed on the brief, why (typically: those queries are navigational, or no fresh citable material exists for them). Be specific; name the query or page." : "an empty string (no reader-demand brief was given)."}
+
+${PLAIN_WRITING}
 
 STEP 3 — Return the finished post in the required JSON shape and nothing else.`;
 }
@@ -491,7 +600,17 @@ async function main() {
     ? (JSON.parse(fs.readFileSync(args.fromDraft, "utf8")) as Draft)
     : await researchAndDraft({ existing, today, cutoff, lookbackDays, demand, model, outDir });
   if (existing.some((p) => p.title.toLowerCase() === draft.title.toLowerCase())) throw new Error(`Draft duplicates an existing title: ${draft.title}`);
-  const { words, warnings } = validateDraft(draft, cutoff);
+  const checked = validateDraft(draft, cutoff);
+  const warnings = checked.warnings;
+  let words = checked.words;
+  // Plain writing: list what survived the prompt, and give it one editing pass (--no-style-pass skips it).
+  if (args.stylePass) {
+    warnings.push(...(await reviseForPlainWriting(draft, model)));
+    words = countWords(allText(draft));
+  } else {
+    const left = plainWritingLint(draft);
+    if (left.length) warnings.push(`Plain writing: ${left.length} finding(s), no editing pass: ${left.join("; ")}`);
+  }
   fs.writeFileSync(path.join(outDir, "draft.json"), JSON.stringify(draft, null, 2));
 
   const files = dryRun ? [] : writePost(draft, today, words);
